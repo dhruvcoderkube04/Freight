@@ -7,6 +7,11 @@
             <i class="fas fa-receipt me-2"></i>My Quotes
         </a>
     </li>
+    <form action="{{ route('logout') }}" method="POST">
+        @csrf
+        <button type="submit" class="btn btn-danger">Logout</button>
+    </form>
+
     <div class="row">
         <div class="col-12 text-center mb-4">
             <h1 class="display-4 text-primary">Get A Quote</h1>

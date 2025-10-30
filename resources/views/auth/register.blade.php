@@ -1,84 +1,93 @@
 @extends('layouts.app')
 
-@section('title', 'Register')
+@section('title', 'Ark Sign Up')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold mb-6 text-center">Register</h2>
-        
-        <form method="POST" action="{{ route('register') }}">
-            @csrf
-            
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="fullname">
-                    Full Name
-                </label>
-                <input type="text" name="fullname" id="fullname" value="{{ old('fullname') }}" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required autofocus>
-                @error('fullname') 
-                    <span class="text-red-500 text-sm">{{ $message }}</span> 
-                @enderror
-            </div>
+<div class="ark__container">
+    <!-- Left: Image -->
+    <div class="ark__image-section">
+        <div class="ark__image-overlay"></div>
+    </div>
 
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                    Email
-                </label>
-                <input type="email" name="email" id="email" value="{{ old('email') }}" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required>
-                @error('email') 
-                    <span class="text-red-500 text-sm">{{ $message }}</span> 
-                @enderror
-            </div>
+    <!-- Right: Sign Up Form -->
+    <div class="ark__form-section">
+        <div class="ark__logo">Sign<span>Up</span></div>
 
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                    Password
-                </label>
-                <input type="password" name="password" id="password" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required>
-                @error('password') 
-                    <span class="text-red-500 text-sm">{{ $message }}</span> 
-                @enderror
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password_confirmation">
-                    Confirm Password
-                </label>
-                <input type="password" name="password_confirmation" id="password_confirmation" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                Register
-            </button>
-        </form>
-
-        <div class="mt-6 text-center">
-            <p class="text-gray-600">Or register with:</p>
-            <div class="mt-4 flex justify-center space-x-4">
-                <a href="{{ route('social.login', 'google') }}" 
-                   class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center">
-                    <i class="fab fa-google mr-2"></i> Google
-                </a>
-                <a href="{{ route('social.login', 'facebook') }}" 
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
-                    <i class="fab fa-facebook mr-2"></i> Facebook
-                </a>
-            </div>
+        <div class="ark__auth-header">
+            <h1 class="ark__title">Create An Account</h1>
+            <p class="ark__subtitle mb-0">
+                Create Your Account To Manage And Track Your Shipments With Ease.
+            </p>
         </div>
 
-        <div class="mt-4 text-center">
-            <a href="{{ route('login') }}" class="text-blue-500 hover:underline">
-                Already have an account? Login
+        <!-- Social Buttons -->
+        <div class="ark__social-buttons">
+            <a href="{{ route('social.login', 'google') }}" class="ark__social-btn ark__google">
+                <div class="ark__icon-wrap">
+                    <img src="{{ asset('assets/images/GoogleIcon.svg') }}" alt="Google">
+                </div>
+                <p class="mb-0">Sign up with Google</p>
+            </a>
+            <a href="{{ route('social.login', 'facebook') }}" class="ark__social-btn ark__facebook">
+                <div class="ark__icon-wrap">
+                    <img src="{{ asset('assets/images/Facebook.svg') }}" alt="Facebook">
+                </div>
+                <p class="mb-0">Sign up with Facebook</p>
             </a>
         </div>
+
+        <!-- Divider -->
+        <div class="ark__divider"><span>Or</span></div>
+
+        <!-- Laravel Form -->
+        <form method="POST" action="{{ route('register') }}">
+            @csrf
+            <div class="ark__form-group">
+                <label class="ark__label" for="fullname">Full Name</label>
+                <input type="text" name="fullname" id="fullname" class="ark__input"
+                       placeholder="Enter Your Full Name" value="{{ old('fullname') }}" required>
+                @error('fullname')
+                    <span class="text-danger small">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="ark__form-group">
+                <label class="ark__label" for="email">Email</label>
+                <input type="email" name="email" id="email" class="ark__input"
+                       placeholder="you@example.com" value="{{ old('email') }}" required>
+                @error('email')
+                    <span class="text-danger small">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="ark__form-group">
+                <label class="ark__label" for="password">Password</label>
+                <input type="password" name="password" id="password" class="ark__input"
+                       placeholder="Enter Your Password" required>
+                @error('password')
+                    <span class="text-danger small">{{ $message }}</span>
+                @enderror
+            </div>
+
+            <div class="ark__form-group">
+                <label class="ark__label" for="password_confirmation">Confirm Password</label>
+                <input type="password" name="password_confirmation" id="password_confirmation"
+                       class="ark__input" placeholder="Re-enter Password" required>
+            </div>
+
+            <div class="ark__checkbox-group">
+                <input type="checkbox" id="terms" class="ark__checkbox" required>
+                <label for="terms">
+                    I Agree To The <a href="#">Terms & Conditions</a> And <a href="#">Privacy Policy</a>
+                </label>
+            </div>
+
+            <button type="submit" class="ark__submit-btn">Sign Up</button>
+
+            <p class="ark__login-link">
+                Already Have An Account? <a href="{{ route('login') }}">Log In</a>
+            </p>
+        </form>
     </div>
 </div>
 @endsection

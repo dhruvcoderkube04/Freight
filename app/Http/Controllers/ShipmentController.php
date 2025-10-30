@@ -156,7 +156,7 @@ class ShipmentController extends Controller
             'quantity' => $request->quantity ?? 1,
             'unit_type' => $request->unit_type ?? 'pallet',
             'freight_class_code' => $request->freight_class_code ?? '110',
-            'weight' => $request->weight ?? 100,
+            'weight' => $request->weight ?? 100, 
             'length' => $request->length ?? 48,
             'width' => $request->width ?? 48,
             'height' => $request->height ?? 48,
