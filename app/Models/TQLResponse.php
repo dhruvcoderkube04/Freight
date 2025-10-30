@@ -1,0 +1,31 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Model;
+
+class TQLResponse extends Model
+{
+    use HasFactory;
+
+    protected $table = 'tql_responses'; // Explicitly set table name
+
+    protected $fillable = [
+        'shipment_id',
+        'response',
+        'tql_quote_id',
+        'status_code',
+        'status',
+        'error_message'
+    ];
+
+    protected $casts = [
+        'response' => 'array',
+    ];
+
+    public function shipment()
+    {
+        return $this->belongsTo(Shipment::class);
+    }
+}
