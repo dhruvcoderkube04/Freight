@@ -15,22 +15,36 @@
                     Email
                 </label>
                 <input type="email" name="email" id="email" value="{{ old('email') }}" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                @error('email') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                    required autofocus>
+                @error('email') 
+                    <span class="text-red-500 text-sm">{{ $message }}</span> 
+                @enderror
             </div>
 
-            <div class="mb-6">
+            <div class="mb-4">
                 <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
                     Password
                 </label>
                 <input type="password" name="password" id="password" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500">
-                @error('password') <span class="text-red-500 text-sm">{{ $message }}</span> @enderror
+                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
+                    required>
+                @error('password') 
+                    <span class="text-red-500 text-sm">{{ $message }}</span> 
+                @enderror
             </div>
 
-            <div class="mb-4 flex items-center">
-                <input type="checkbox" name="remember" id="remember" class="mr-2">
-                <label for="remember" class="text-sm text-gray-700">Remember me</label>
+            <div class="mb-4 flex items-center justify-between">
+                <div class="flex items-center">
+                    <input type="checkbox" name="remember" id="remember" class="mr-2">
+                    <label for="remember" class="text-sm text-gray-700">Remember me</label>
+                </div>
+                
+                <div class="text-right">
+                    <a href="{{ route('password.request') }}" class="text-blue-500 hover:underline text-sm">
+                        Forgot Password?
+                    </a>
+                </div>
             </div>
 
             <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
@@ -42,12 +56,12 @@
             <p class="text-gray-600">Or login with:</p>
             <div class="mt-4 flex justify-center space-x-4">
                 <a href="{{ route('social.login', 'google') }}" 
-                   class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600">
-                    Google
+                   class="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 flex items-center">
+                    <i class="fab fa-google mr-2"></i> Google
                 </a>
                 <a href="{{ route('social.login', 'facebook') }}" 
-                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
-                    Facebook
+                   class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center">
+                    <i class="fab fa-facebook mr-2"></i> Facebook
                 </a>
             </div>
         </div>
