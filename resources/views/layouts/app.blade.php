@@ -8,12 +8,10 @@
 
     <!-- Bootstrap / Fonts (if needed) -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&family=Nunito+Sans:ital,opsz,wght@0,6..12,200..1000;1,6..12,200..1000&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">    
     <link rel="shortcut icon" href="{{ asset('assets/media/logos/favicon.ico') }}" />
 
-    {{-- signup css --}}
-    <link rel="stylesheet" href="{{ asset('assets/css/signup.css') }}">
+    {{-- custom css --}}
     <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}">
     
     @yield('styles')

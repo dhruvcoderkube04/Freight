@@ -3,57 +3,55 @@
 @section('title', 'Reset Password')
 
 @section('content')
-<div class="min-h-screen flex items-center justify-center">
-    <div class="bg-white p-8 rounded-lg shadow-md w-96">
-        <h2 class="text-2xl font-bold mb-6 text-center">Reset Password</h2>
+<!-- Google Fonts: Inter & DM Sans -->
+<link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:ital,wght@0,400;0,700;1,400&family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="{{ asset('assets/css/forgot-password.css') }}">
+<div class="ark__container">
+    <!-- Right: Reset Password Form -->
+    <div class="ark__form-section ark__reset-password">
+        <div class="ark__form--wrap">
+            <div class="ark__form-bg">
+                <div class="ark__form--center">
+                    <div class="ark__auth-header ark__login-width">
+                        <h1 class="ark__title">Reset Your Password</h1>
+                        <p class="ark__subtitle">Enter your new password below to regain access.</p>
+                    </div>
 
-        @if (session('status'))
-            <div class="mb-4 text-green-600 text-sm text-center">
-                {{ session('status') }}
+                    @if (session('status'))
+                        <div class="mb-4 text-green-600 text-sm text-center">
+                            {{ session('status') }}
+                        </div>
+                    @endif
+
+                    <form class="ark__login-width" method="POST" action="{{ route('password.update') }}">
+                        @csrf
+                        <input type="hidden" name="token" value="{{ $token }}">
+                        <input type="hidden" name="email" value="{{ $email ?? old('email') }}">
+
+                        <div class="ark__form-group">
+                            <label class="ark__label">New Password</label>
+                            <input type="password" name="password" id="password" class="ark__input" placeholder="Enter Your Password" required autofocus>
+                            @error('password')
+                                <span class="text-red-500 text-sm">{{ $message }}</span>
+                            @enderror
+                        </div>
+
+                        <div class="ark__form-group">
+                            <label class="ark__label">Confirm Password</label>
+                            <input type="password" name="password_confirmation" id="password_confirmation" class="ark__input" placeholder="Re-Enter Password For Safety" required>
+                        </div>
+
+                        <button type="submit" class="ark__submit-btn">Reset Password</button>
+
+                        <p class="ark__login-link">
+                            <a href="{{ route('login') }}">Back to Login</a>
+                        </p>
+                    </form>
+                </div>
+                <div class="ark__round-one"></div>
+                <div class="ark__round-two"></div>
             </div>
-        @endif
-
-        <form method="POST" action="{{ route('password.update') }}">
-            @csrf
-            <input type="hidden" name="token" value="{{ $token }}">
-            
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="email">
-                    Email Address
-                </label>
-                <input type="email" name="email" id="email" value="{{ $email ?? old('email') }}" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required autofocus>
-                @error('email') 
-                    <span class="text-red-500 text-sm">{{ $message }}</span> 
-                @enderror
-            </div>
-
-            <div class="mb-4">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password">
-                    New Password
-                </label>
-                <input type="password" name="password" id="password" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required>
-                @error('password') 
-                    <span class="text-red-500 text-sm">{{ $message }}</span> 
-                @enderror
-            </div>
-
-            <div class="mb-6">
-                <label class="block text-gray-700 text-sm font-bold mb-2" for="password_confirmation">
-                    Confirm New Password
-                </label>
-                <input type="password" name="password_confirmation" id="password_confirmation" 
-                    class="w-full px-3 py-2 border rounded-lg focus:outline-none focus:border-blue-500"
-                    required>
-            </div>
-
-            <button type="submit" class="w-full bg-blue-500 text-white py-2 rounded-lg hover:bg-blue-600">
-                Reset Password
-            </button>
-        </form>
+        </div>
     </div>
 </div>
 @endsection
