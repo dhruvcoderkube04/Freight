@@ -17,11 +17,10 @@ return new class extends Migration
             $table->string('email')->unique();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
-            $table->enum('type', ['admin', 'user', 'manager'])->default('user');
-            $table->enum('user_type', ['individual', 'business', 'corporate'])->default('individual');
+            $table->string('type')->default('email');
+            $table->string('user_type')->default('user');
             $table->string('google_token')->nullable();
             $table->string('facebook_token')->nullable();
-            $table->string('provider')->nullable();
             $table->string('provider_id')->nullable();
             $table->string('avatar')->nullable();
             $table->boolean('auto_approved')->default(false);

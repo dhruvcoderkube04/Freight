@@ -21,7 +21,6 @@ class RegisterController extends Controller
             'fullname' => 'required|string|max:255',
             'email' => 'required|string|email|max:255|unique:users',
             'password' => 'required|string|min:8|confirmed',
-            'user_type' => 'required|in:individual,business,corporate',
         ]);
 
         if ($validator->fails()) {
@@ -32,9 +31,9 @@ class RegisterController extends Controller
             'fullname' => $request->fullname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'user_type' => $request->user_type,
-            'type' => 'user', // Default type
-            'auto_approved' => false, // Default value
+            'type' => 'email',
+            'user_type' => 'user',
+            'auto_approved' => false,
         ]);
 
         return redirect('/login')->with('success', 'Registration successful! Please login.');

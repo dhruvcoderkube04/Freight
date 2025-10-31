@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Auth\ForgotPasswordController;
 use App\Http\Controllers\ShipmentController;
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\RegisterController;
@@ -8,7 +9,6 @@ use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
-// Public Routes (Unauthenticated)
 Route::get('/', function () {
     return redirect('/login');
 });
@@ -21,24 +21,30 @@ Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
 Route::post('/login', [LoginController::class, 'login']);
 Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
 
+// Password Reset Routes
+Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
+Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
+Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
+Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
+
 // Social Login Routes
 Route::get('/auth/{provider}', [SocialLoginController::class, 'redirectToProvider'])->name('social.login');
 Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'handleProviderCallback']);
 
 // Protected Routes - Require Authentication
 Route::middleware('auth')->group(function () {
-    // Shipment Routes
+    // Shipment
     Route::get('/shipments/create', [ShipmentController::class, 'create'])->name('shipments.create');
     Route::post('/shipments/step1', [ShipmentController::class, 'storeStep1'])->name('shipments.store.step1');
     Route::post('/shipments/step2', [ShipmentController::class, 'storeStep2'])->name('shipments.store.step2');
     Route::post('/shipments/step3', [ShipmentController::class, 'storeStep3'])->name('shipments.store.step3');
     Route::post('/shipments/step4', [ShipmentController::class, 'storeStep4'])->name('shipments.store.step4');
 
-    // Quote Management Routes
+    // Quote
     Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
     Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
     
-    // Payment Routes
+    // Payment
     Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
     Route::get('/payments/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('payments.status');

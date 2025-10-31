@@ -20,9 +20,20 @@ class LoginController extends Controller
             'password' => 'required',
         ]);
 
+        // Only allow email-based users to login with password
         if (Auth::attempt($credentials, $request->remember)) {
+            $user = Auth::user();
+            
+            // Check if user is email-based user
+            if ($user->type !== 'email') {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'This account uses social login. Please use Google or Facebook to login.',
+                ])->onlyInput('email');
+            }
+
             $request->session()->regenerate();
-            return redirect()->intended('/shipments/create'); // Redirect to shipments create
+            return redirect()->intended('/shipments/create');
         }
 
         return back()->withErrors([

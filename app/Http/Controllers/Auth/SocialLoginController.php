@@ -28,10 +28,9 @@ class SocialLoginController extends Controller
                 $user = User::create([
                     'fullname' => $socialUser->getName() ?? $socialUser->getNickname() ?? 'User',
                     'email' => $socialUser->getEmail(),
-                    'password' => Hash::make(uniqid()), // Random password
-                    'type' => 'user',
-                    'user_type' => 'individual',
-                    'provider' => $provider,
+                    'password' => Hash::make(uniqid()),
+                    'type' => $provider, // 'google' or 'facebook'
+                    'user_type' => 'user',
                     'provider_id' => $socialUser->getId(),
                     'avatar' => $socialUser->getAvatar(),
                     'email_verified_at' => now(),
@@ -40,26 +39,27 @@ class SocialLoginController extends Controller
 
                 // Store provider token
                 if ($provider === 'google') {
-                    $user->update(['google_token' => $socialUser->token]);
+                    $user->google_token = $socialUser->token;
                 } elseif ($provider === 'facebook') {
-                    $user->update(['facebook_token' => $socialUser->token]);
+                    $user->facebook_token = $socialUser->token;
                 }
+                $user->save();
+
             } else {
                 // Update existing user with provider info
-                $updateData = [
-                    'provider' => $provider,
+                $user->update([
+                    'type' => $provider,
                     'provider_id' => $socialUser->getId(),
                     'avatar' => $socialUser->getAvatar(),
-                ];
+                ]);
 
                 // Update provider token
                 if ($provider === 'google') {
-                    $updateData['google_token'] = $socialUser->token;
+                    $user->google_token = $socialUser->token;
                 } elseif ($provider === 'facebook') {
-                    $updateData['facebook_token'] = $socialUser->token;
+                    $user->facebook_token = $socialUser->token;
                 }
-
-                $user->update($updateData);
+                $user->save();
             }
 
             Auth::login($user, true);
