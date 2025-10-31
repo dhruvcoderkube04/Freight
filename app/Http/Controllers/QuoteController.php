@@ -19,14 +19,15 @@ class QuoteController extends Controller
             ->get();
 
         $locationTypes = LocationType::where('is_active', true)
-                                   ->orderBy('sort_order')
-                                   ->get();
+            ->orderBy('sort_order')
+            ->get();
 
         return view('quotes.index', compact('shipments', 'locationTypes'));
     }
 
     public function show($id)
     {
+        $id = decrypt($id);
         $shipment = Shipment::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
@@ -34,14 +35,15 @@ class QuoteController extends Controller
         $latestResponse = $shipment->tqlResponses->last();
 
         $locationTypes = LocationType::where('is_active', true)
-                                   ->orderBy('sort_order')
-                                   ->get();
+            ->orderBy('sort_order')
+            ->get();
 
         return view('quotes.show', compact('shipment', 'latestResponse', 'locationTypes'));
     }
 
     public function showPaymentForm(Request $request, $id)
     {
+        $id = decrypt($id);
         $shipment = Shipment::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
@@ -108,7 +110,7 @@ class QuoteController extends Controller
         $payment = Payment::create([
             'shipment_id' => $shipment->id,
             'user_id' => Auth::id(),
-            
+
             // Carrier specific details
             'carrier_name' => $carrierName,
             'carrier_scac' => $carrierScac,
@@ -121,11 +123,11 @@ class QuoteController extends Controller
             'max_liability_new' => $maxLiabilityNew,
             'max_liability_used' => $maxLiabilityUsed,
             'price_charges' => $priceCharges ? json_encode($priceCharges) : null,
-            
+
             // Payment status
             'payment_status' => $requiresApproval ? 'requires_approval' : 'pending',
             'requires_approval' => $requiresApproval,
-            
+
             // Amount details
             'currency' => 'usd',
             'amount' => $customerRate,

@@ -10,7 +10,7 @@
                     <p class="text-muted">Quote #{{ $shipment->id }}</p>
                 </div>
                 <div>
-                    <a href="{{ route('quotes.index') }}" class="btn btn-outline-secondary me-2">
+                    <a href="{{ route('shipments.create') }}" class="btn btn-outline-secondary me-2">
                         <i class="fas fa-arrow-left me-2"></i>Back to Quotes
                     </a>
                     @if($latestResponse && $latestResponse->status === 'success')
@@ -263,7 +263,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 function showCarrierSelection() {
     var modal = new bootstrap.Modal(document.getElementById('carrierSelectionModal'));
@@ -271,11 +271,11 @@ function showCarrierSelection() {
 }
 
 function selectCarrier(carrierIndex) {
-    window.location.href = `/quotes/{{ $shipment->id }}/payment?carrier_index=${carrierIndex}`;
+    window.location.href = `/quotes/{{ encrypt($shipment->id) }}/payment?carrier_index=${carrierIndex}`;
 }
 
 function initiatePayment(shipmentId) {
     showCarrierSelection();
 }
 </script>
-@endsection
+@endpush

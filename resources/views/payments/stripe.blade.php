@@ -60,7 +60,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script src="https://js.stripe.com/v3/"></script>
 <script>
 const stripe = Stripe('{{ $stripeKey }}');
@@ -141,4 +141,4 @@ const checkStatus = async () => {
 
 checkStatus();
 </script>
-@endsection
+@endpush

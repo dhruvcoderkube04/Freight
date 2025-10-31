@@ -20,20 +20,24 @@ class ShipmentController extends Controller
 {
     public function create()
     {
-        // Get all dynamic options from database
         $locationTypes = LocationType::where('is_active', true)->orderBy('sort_order')->get();
         $countries = CountryCode::where('is_active', true)->orderBy('sort_order')->get();
         $unitTypes = UnitType::where('is_active', true)->orderBy('sort_order')->get();
         $freightClasses = FreightClassCode::where('is_active', true)->orderBy('sort_order')->get();
+        
+        $shipments = Shipment::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
+            ->where('user_id', Auth::id())
+            ->orderBy('created_at', 'desc')
+            ->get();
 
         return view('shipments.create', compact(
             'locationTypes',
             'countries',
             'unitTypes',
-            'freightClasses'
+            'freightClasses',
+            'shipments'
         ));
     }
-
 
     public function storeStep1(Request $request)
     {

@@ -13,7 +13,7 @@ return new class extends Migration
             $table->string('pickup_location');
             $table->string('drop_location');
             $table->date('shipment_date');
-            $table->enum('status', ['draft', 'completed'])->default('draft');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }

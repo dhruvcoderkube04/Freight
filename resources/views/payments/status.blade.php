@@ -72,7 +72,7 @@
                     </div>
 
                     <div class="mt-4 text-center">
-                        <a href="{{ route('quotes.index') }}" class="btn btn-primary me-2">
+                        <a href="{{ route('shipments.create') }}" class="btn btn-primary me-2">
                             <i class="fas fa-list me-2"></i>Back to Quotes
                         </a>
                         <a href="{{ route('quotes.show', $payment->shipment_id) }}" class="btn btn-outline-secondary">

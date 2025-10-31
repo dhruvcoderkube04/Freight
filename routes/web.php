@@ -42,8 +42,8 @@ Route::middleware('auth')->group(function () {
 
     // Quote
     Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
-    Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
-    
+    Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
+
     // Payment
     Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');

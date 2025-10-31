@@ -133,7 +133,7 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ route('quotes.show', $shipment->id) }}" class="btn btn-secondary">
+                            <a href="{{ route('quotes.show', encrypt($shipment->id)) }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Quote
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">
@@ -156,7 +156,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Form validation
@@ -171,4 +171,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+@endpush
