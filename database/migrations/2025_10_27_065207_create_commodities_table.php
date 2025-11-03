@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('commodities', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shipment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('quote_id')->constrained()->onDelete('cascade');
             $table->integer('quantity');
             $table->string('unit_type');
             $table->string('freight_class_code');

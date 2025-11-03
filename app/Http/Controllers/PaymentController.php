@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Payment;
-use App\Models\Shipment;
+use App\Models\Quote;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Stripe\Stripe;
@@ -19,7 +19,7 @@ class PaymentController extends Controller
 
     public function processStripePayment($paymentId)
     {
-        $payment = Payment::with(['shipment', 'user'])
+        $payment = Payment::with(['quote', 'user'])
             ->where('user_id', Auth::id())
             ->findOrFail($paymentId);
 
@@ -34,10 +34,10 @@ class PaymentController extends Controller
                 'currency' => $payment->currency,
                 'metadata' => [
                     'payment_id' => $payment->id,
-                    'shipment_id' => $payment->shipment_id,
+                    'quote_id' => $payment->quote_id,
                     'user_id' => $payment->user_id,
                 ],
-                'description' => "Shipping payment for Shipment #{$payment->shipment_id}",
+                'description' => "Shipping payment for Quotes #{$payment->quote_id}",
                 'automatic_payment_methods' => [
                     'enabled' => true,
                 ],
@@ -68,7 +68,7 @@ class PaymentController extends Controller
 
     public function paymentSuccess(Request $request, $paymentId)
     {
-        $payment = Payment::with(['shipment', 'shipment.pickupDetail', 'shipment.deliveryDetail'])
+        $payment = Payment::with(['quote', 'quote.pickupDetail', 'quote.deliveryDetail'])
             ->where('user_id', Auth::id())
             ->findOrFail($paymentId);
 
@@ -83,8 +83,8 @@ class PaymentController extends Controller
                         'stripe_charge_id' => $paymentIntent->latest_charge,
                     ]);
 
-                    // Update shipment status
-                    $payment->shipment->update([
+                    // Update quote status
+                    $payment->quote->update([
                         'status' => 'paid',
                     ]);
 
@@ -161,8 +161,8 @@ class PaymentController extends Controller
                 'stripe_charge_id' => $paymentIntent->latest_charge,
             ]);
 
-            // Update shipment status
-            $payment->shipment->update([
+            // Update Quotes status
+            $payment->quote->update([
                 'status' => 'paid',
             ]);
 

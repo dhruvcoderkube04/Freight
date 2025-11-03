@@ -1,64 +1,44 @@
 <?php
 
-use App\Http\Controllers\Auth\ForgotPasswordController;
-use App\Http\Controllers\ShipmentController;
-use App\Http\Controllers\Auth\LoginController;
-use App\Http\Controllers\Auth\RegisterController;
-use App\Http\Controllers\Auth\SocialLoginController;
+use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\QuoteController;
 use App\Http\Controllers\PaymentController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect('/login');
-});
+Route::get('/', fn() => redirect('/login'));
 
 // Authentication Routes
-Route::get('/register', [RegisterController::class, 'showRegistrationForm'])->name('register');
-Route::post('/register', [RegisterController::class, 'register']);
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/register', 'showRegistrationForm')->name('register');
+    Route::post('/register', 'register');
+    Route::get('/login', 'showLoginForm')->name('login');
+    Route::post('/login', 'login');
+    Route::post('/logout', 'logout')->name('logout');
 
-Route::get('/login', [LoginController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [LoginController::class, 'login']);
-Route::post('/logout', [LoginController::class, 'logout'])->name('logout');
+    // Forgot / Reset Password
+    Route::get('/forgot-password', 'showForgotForm')->name('password.request');
+    Route::post('/forgot-password', 'sendResetLinkEmail')->name('password.email');
+    Route::get('/reset-password/{token}', 'showResetForm')->name('password.reset');
+    Route::post('/reset-password', 'reset')->name('password.update');
 
-// Password Reset Routes
-Route::get('/forgot-password', [ForgotPasswordController::class, 'showLinkRequestForm'])->name('password.request');
-Route::post('/forgot-password', [ForgotPasswordController::class, 'sendResetLinkEmail'])->name('password.email');
-Route::get('/reset-password/{token}', [ForgotPasswordController::class, 'showResetForm'])->name('password.reset');
-Route::post('/reset-password', [ForgotPasswordController::class, 'reset'])->name('password.update');
+    // Social login
+    Route::get('/auth/{provider}', 'redirectToProvider')->name('social.login');
+    Route::get('/auth/{provider}/callback', 'handleProviderCallback');
+});
 
-// Social Login Routes
-Route::get('/auth/{provider}', [SocialLoginController::class, 'redirectToProvider'])->name('social.login');
-Route::get('/auth/{provider}/callback', [SocialLoginController::class, 'handleProviderCallback']);
+// Protected routes
+Route::middleware(['auth', 'session.timeout'])->group(function () {
+    Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
+    Route::post('/quotes/step1', [QuoteController::class, 'storeStep1'])->name('quotes.store.step1');
+    Route::post('/quotes/step2', [QuoteController::class, 'storeStep2'])->name('quotes.store.step2');
+    Route::post('/quotes/step3', [QuoteController::class, 'storeStep3'])->name('quotes.store.step3');
+    Route::post('/quotes/step4', [QuoteController::class, 'storeStep4'])->name('quotes.store.step4');
 
-// Protected Routes - Require Authentication
-Route::middleware('auth')->group(function () {
-    // Shipment
-    Route::get('/shipments/create', [ShipmentController::class, 'create'])->name('shipments.create');
-    Route::post('/shipments/step1', [ShipmentController::class, 'storeStep1'])->name('shipments.store.step1');
-    Route::post('/shipments/step2', [ShipmentController::class, 'storeStep2'])->name('shipments.store.step2');
-    Route::post('/shipments/step3', [ShipmentController::class, 'storeStep3'])->name('shipments.store.step3');
-    Route::post('/shipments/step4', [ShipmentController::class, 'storeStep4'])->name('shipments.store.step4');
-
-    // Quote
-    Route::get('/quotes', [QuoteController::class, 'index'])->name('quotes.index');
-    Route::get('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
-    
-    // Payment
+    Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
     Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
     Route::get('/payments/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('payments.status');
     Route::get('/payments/{payment}/process', [PaymentController::class, 'processStripePayment'])->name('payments.process');
     Route::get('/payments/{payment}/success', [PaymentController::class, 'paymentSuccess'])->name('payments.success');
     Route::get('/payments/{payment}/cancel', [PaymentController::class, 'paymentCancel'])->name('payments.cancel');
-
-    // Dashboard
-    Route::get('/dashboard', function () {
-        return redirect('/quotes');
-    })->name('dashboard');
-
-    // Redirect root to quotes when authenticated
-    Route::get('/', function () {
-        return redirect('/quotes');
-    });
 });

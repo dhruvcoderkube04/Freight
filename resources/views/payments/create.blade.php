@@ -53,29 +53,29 @@
                         </div>
                     </div>
 
-                    <!-- Shipment Information -->
+                    <!-- Quote Information -->
                     <div class="card mb-4">
                         <div class="card-header bg-light">
-                            <h5 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Shipment Details</h5>
+                            <h5 class="mb-0"><i class="fas fa-shipping-fast me-2"></i>Quote Details</h5>
                         </div>
                         <div class="card-body">
                             <div class="row">
                                 <div class="col-md-6">
                                     <h6>Pickup Location</h6>
-                                    @if($shipment->pickupDetail)
-                                        <p class="mb-1"><strong>Address:</strong> {{ $shipment->pickupDetail->address_1 ?: 'Not provided' }}</p>
-                                        <p class="mb-1"><strong>City/State:</strong> {{ $shipment->pickupDetail->city }}, {{ $shipment->pickupDetail->state }}</p>
-                                        <p class="mb-0"><strong>Postal Code:</strong> {{ $shipment->pickupDetail->postal_code ?: 'Not provided' }}</p>
+                                    @if($quote->pickupDetail)
+                                        <p class="mb-1"><strong>Address:</strong> {{ $quote->pickupDetail->address_1 ?: 'Not provided' }}</p>
+                                        <p class="mb-1"><strong>City/State:</strong> {{ $quote->pickupDetail->city }}, {{ $quote->pickupDetail->state }}</p>
+                                        <p class="mb-0"><strong>Postal Code:</strong> {{ $quote->pickupDetail->postal_code ?: 'Not provided' }}</p>
                                     @else
                                         <p class="text-muted fst-italic">Pickup details not available</p>
                                     @endif
                                 </div>
                                 <div class="col-md-6">
                                     <h6>Delivery Location</h6>
-                                    @if($shipment->deliveryDetail)
-                                        <p class="mb-1"><strong>Address:</strong> {{ $shipment->deliveryDetail->address_1 ?: 'Not provided' }}</p>
-                                        <p class="mb-1"><strong>City/State:</strong> {{ $shipment->deliveryDetail->city }}, {{ $shipment->deliveryDetail->state }}</p>
-                                        <p class="mb-0"><strong>Postal Code:</strong> {{ $shipment->deliveryDetail->postal_code ?: 'Not provided' }}</p>
+                                    @if($quote->deliveryDetail)
+                                        <p class="mb-1"><strong>Address:</strong> {{ $quote->deliveryDetail->address_1 ?: 'Not provided' }}</p>
+                                        <p class="mb-1"><strong>City/State:</strong> {{ $quote->deliveryDetail->city }}, {{ $quote->deliveryDetail->state }}</p>
+                                        <p class="mb-0"><strong>Postal Code:</strong> {{ $quote->deliveryDetail->postal_code ?: 'Not provided' }}</p>
                                     @else
                                         <p class="text-muted fst-italic">Delivery details not available</p>
                                     @endif
@@ -111,7 +111,7 @@
                     </div>
 
                     <!-- Payment Form -->
-                    <form id="paymentForm" action="{{ route('quotes.payment.process', $shipment->id) }}" method="POST">
+                    <form id="paymentForm" action="{{ route('quotes.payment.process', $quote->id) }}" method="POST">
                         @csrf
                         <input type="hidden" name="selected_carrier_index" value="{{ $selectedCarrierIndex }}">
 
@@ -133,7 +133,7 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ route('quotes.show', $shipment->id) }}" class="btn btn-secondary">
+                            <a href="{{ route('quotes.show', encrypt($quote->id)) }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Quote
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">
@@ -156,7 +156,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // Form validation
@@ -171,4 +171,4 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 });
 </script>
-@endsection
+@endpush

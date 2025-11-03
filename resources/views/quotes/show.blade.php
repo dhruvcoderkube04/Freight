@@ -7,7 +7,7 @@
             <div class="d-flex justify-content-between align-items-center mb-4">
                 <div>
                     <h1 class="display-5 text-primary">Quote Details</h1>
-                    <p class="text-muted">Quote #{{ $shipment->id }}</p>
+                    <p class="text-muted">Quote #{{ $quote->id }}</p>
                 </div>
                 <div>
                     <a href="{{ route('quotes.index') }}" class="btn btn-outline-secondary me-2">
@@ -36,7 +36,7 @@
                                 <div>
                                     <h6 class="mb-1">Pickup Location</h6>
                                     <p class="mb-0 fw-bold text-primary">
-                                        {{ $locationTypes->firstWhere('code', $shipment->pickup_location)->name ?? ucfirst($shipment->pickup_location) }}
+                                        {{ $locationTypes->firstWhere('code', $quote->pickup_location)->name ?? ucfirst($shipment->pickup_location) }}
                                     </p>
                                 </div>
                             </div>
@@ -49,7 +49,7 @@
                                 <div>
                                     <h6 class="mb-1">Delivery Location</h6>
                                     <p class="mb-0 fw-bold text-success">
-                                        {{ $locationTypes->firstWhere('code', $shipment->drop_location)->name ?? ucfirst($shipment->drop_location) }}
+                                        {{ $locationTypes->firstWhere('code', $quote->drop_location)->name ?? ucfirst($shipment->drop_location) }}
                                     </p>
                                 </div>
                             </div>
@@ -67,34 +67,34 @@
                     <div class="row">
                         <div class="col-md-6">
                             <h6 class="border-bottom pb-2">Pickup Details</h6>
-                            @if($shipment->pickupDetail)
+                            @if($quote->pickupDetail)
                                 <p class="mb-1"><strong>Address:</strong> 
-                                    {{ $shipment->pickupDetail->address_1 ?: 'Not provided' }}
-                                    @if($shipment->pickupDetail->address_2)
-                                        <br>{{ $shipment->pickupDetail->address_2 }}
+                                    {{ $quote->pickupDetail->address_1 ?: 'Not provided' }}
+                                    @if($quote->pickupDetail->address_2)
+                                        <br>{{ $quote->pickupDetail->address_2 }}
                                     @endif
                                 </p>
-                                <p class="mb-1"><strong>City/State:</strong> {{ $shipment->pickupDetail->city }}, {{ $shipment->pickupDetail->state }}</p>
-                                <p class="mb-1"><strong>Postal Code:</strong> {{ $shipment->pickupDetail->postal_code ?: 'Not provided' }}</p>
-                                <p class="mb-1"><strong>Country:</strong> {{ $shipment->pickupDetail->country ?: 'Not provided' }}</p>
-                                <p class="mb-0"><strong>Contact:</strong> {{ $shipment->pickupDetail->contact_number ?: 'Not provided' }}</p>
+                                <p class="mb-1"><strong>City/State:</strong> {{ $quote->pickupDetail->city }}, {{ $quote->pickupDetail->state }}</p>
+                                <p class="mb-1"><strong>Postal Code:</strong> {{ $quote->pickupDetail->postal_code ?: 'Not provided' }}</p>
+                                <p class="mb-1"><strong>Country:</strong> {{ $quote->pickupDetail->country ?: 'Not provided' }}</p>
+                                <p class="mb-0"><strong>Contact:</strong> {{ $quote->pickupDetail->contact_number ?: 'Not provided' }}</p>
                             @else
                                 <p class="text-muted fst-italic">Pickup details not available</p>
                             @endif
                         </div>
                         <div class="col-md-6">
                             <h6 class="border-bottom pb-2">Delivery Details</h6>
-                            @if($shipment->deliveryDetail)
+                            @if($quote->deliveryDetail)
                                 <p class="mb-1"><strong>Address:</strong> 
-                                    {{ $shipment->deliveryDetail->address_1 ?: 'Not provided' }}
-                                    @if($shipment->deliveryDetail->address_2)
-                                        <br>{{ $shipment->deliveryDetail->address_2 }}
+                                    {{ $quote->deliveryDetail->address_1 ?: 'Not provided' }}
+                                    @if($quote->deliveryDetail->address_2)
+                                        <br>{{ $quote->deliveryDetail->address_2 }}
                                     @endif
                                 </p>
-                                <p class="mb-1"><strong>City/State:</strong> {{ $shipment->deliveryDetail->city }}, {{ $shipment->deliveryDetail->state }}</p>
-                                <p class="mb-1"><strong>Postal Code:</strong> {{ $shipment->deliveryDetail->postal_code ?: 'Not provided' }}</p>
-                                <p class="mb-1"><strong>Country:</strong> {{ $shipment->deliveryDetail->country ?: 'Not provided' }}</p>
-                                <p class="mb-0"><strong>Contact:</strong> {{ $shipment->deliveryDetail->contact_number ?: 'Not provided' }}</p>
+                                <p class="mb-1"><strong>City/State:</strong> {{ $quote->deliveryDetail->city }}, {{ $quote->deliveryDetail->state }}</p>
+                                <p class="mb-1"><strong>Postal Code:</strong> {{ $quote->deliveryDetail->postal_code ?: 'Not provided' }}</p>
+                                <p class="mb-1"><strong>Country:</strong> {{ $quote->deliveryDetail->country ?: 'Not provided' }}</p>
+                                <p class="mb-0"><strong>Contact:</strong> {{ $quote->deliveryDetail->contact_number ?: 'Not provided' }}</p>
                             @else
                                 <p class="text-muted fst-italic">Delivery details not available</p>
                             @endif
@@ -109,7 +109,7 @@
                     <h5 class="mb-0"><i class="fas fa-boxes text-warning me-2"></i>Commodities</h5>
                 </div>
                 <div class="card-body">
-                    @forelse($shipment->commodities as $commodity)
+                    @forelse($quote->commodities as $commodity)
                         <div class="border rounded p-3 mb-3">
                             <div class="row">
                                 <div class="col-md-3">
@@ -263,7 +263,7 @@
 </div>
 @endsection
 
-@section('scripts')
+@push('scripts')
 <script>
 function showCarrierSelection() {
     var modal = new bootstrap.Modal(document.getElementById('carrierSelectionModal'));
@@ -271,11 +271,11 @@ function showCarrierSelection() {
 }
 
 function selectCarrier(carrierIndex) {
-    window.location.href = `/quotes/{{ $shipment->id }}/payment?carrier_index=${carrierIndex}`;
+    window.location.href = `/quotes/{{ encrypt($quote->id) }}/payment?carrier_index=${carrierIndex}`;
 }
 
 function initiatePayment(shipmentId) {
     showCarrierSelection();
 }
 </script>
-@endsection
+@endpush

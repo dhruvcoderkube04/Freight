@@ -8,18 +8,19 @@ return new class extends Migration
 {
     public function up(): void
     {
-        Schema::create('shipments', function (Blueprint $table) {
+        Schema::create('quotes', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('user_id')->constrained()->onDelete('cascade');
             $table->string('pickup_location');
             $table->string('drop_location');
             $table->date('shipment_date');
-            $table->enum('status', ['draft', 'completed'])->default('draft');
+            $table->string('status')->default('pending');
             $table->timestamps();
         });
     }
 
     public function down(): void
     {
-        Schema::dropIfExists('shipments');
+        Schema::dropIfExists('quotes');
     }
 };

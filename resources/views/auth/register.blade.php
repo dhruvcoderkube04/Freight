@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends('auth.base')
 
 @section('title', 'Ark Sign Up')
 
@@ -18,7 +18,7 @@
         <div class="ark__auth-header">
             <h1 class="ark__title">Create An Account</h1>
             <p class="ark__subtitle mb-0">
-                Create Your Account To Manage And Track Your Shipments With Ease.
+                Create Your Account To Manage And Track Your Quotes With Ease.
             </p>
         </div>
 

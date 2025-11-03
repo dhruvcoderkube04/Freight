@@ -11,7 +11,7 @@ class Payment extends Model
     use HasFactory, SoftDeletes;
 
     protected $fillable = [
-        'shipment_id',
+        'quote_id',
         'user_id',
         // Carrier details
         'carrier_name',
@@ -57,9 +57,9 @@ class Payment extends Model
     ];
 
     // Relationships
-    public function shipment()
+    public function quote()
     {
-        return $this->belongsTo(Shipment::class);
+        return $this->belongsTo(Quote::class);
     }
 
     public function user()

@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('pickup_details', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shipment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('quote_id')->constrained()->onDelete('cascade');
             $table->string('city');
             $table->string('state');
             $table->string('postal_code');

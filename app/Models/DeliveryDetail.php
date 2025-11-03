@@ -10,7 +10,7 @@ class DeliveryDetail extends Model
     use HasFactory;
 
     protected $fillable = [
-        'shipment_id',
+        'quote_id',
         'city',
         'state',
         'postal_code',
@@ -20,8 +20,8 @@ class DeliveryDetail extends Model
         'contact_number'
     ];
 
-    public function shipment()
+    public function quote()
     {
-        return $this->belongsTo(Shipment::class);
+        return $this->belongsTo(Quote::class);
     }
 }

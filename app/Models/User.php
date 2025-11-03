@@ -40,9 +40,9 @@ class User extends Authenticatable
     }
 
     // Relationships
-    public function shipments()
+    public function quotes()
     {
-        return $this->hasMany(Shipment::class);
+        return $this->hasMany(Quote::class);
     }
 
     // Check if user is admin

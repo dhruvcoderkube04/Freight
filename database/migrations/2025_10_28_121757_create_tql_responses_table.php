@@ -10,7 +10,7 @@ return new class extends Migration
     {
         Schema::create('tql_responses', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('shipment_id')->constrained()->onDelete('cascade');
+            $table->foreignId('quote_id')->constrained()->onDelete('cascade');
             $table->json('response')->nullable();
             $table->string('tql_quote_id')->nullable();
             $table->integer('status_code')->nullable();
