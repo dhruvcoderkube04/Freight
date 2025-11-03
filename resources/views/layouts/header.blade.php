@@ -1,6 +1,6 @@
 <header>
     <nav class="ark__navbar">
-        <a href="{{ route('dashboard') }}" class="ark__logo">
+        <a href="{{ route('quotes.index') }}" class="ark__logo">
             <p>Ark<span>Anu</span></p>
         </a>
         
@@ -11,9 +11,9 @@
                 </span>
                 <input type="text" placeholder="Search...">
             </div>
-            <a href="#dashboard" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
+            <a href="#dashboard" class="{{ request()->routeIs('quotes.index') ? 'active' : '' }}">Dashboard</a>
             <a href="#warehouse" class="{{ request()->routeIs('warehouse.*') ? 'active' : '' }}">Book Warehouse</a>
-            <a href="{{ route('shipments.create')}}" class="{{ request()->routeIs('quote.*') ? 'active' : '' }}">Get A Quote</a>
+            <a href="{{ route('quotes.index')}}" class="{{ request()->routeIs('quote.*') ? 'active' : '' }}">Get A Quote</a>
         </div>
         
         <div class="ark__nav-right">
@@ -95,14 +95,20 @@
                             </svg>
                             <span>Settings</span>
                         </a>
-                        <a href="#" class="ark__profile-item ark__logout">
-                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
-                                <polyline points="16 17 21 12 16 7"></polyline>
-                                <line x1="21" y1="12" x2="9" y2="12"></line>
-                            </svg>
-                            <span>Log Out</span>
-                        </a>
+                        <form id="logout-form" action="{{ route('logout') }}" method="POST" style="display: inline;">
+                            @csrf
+                            <a href="javascript:void(0)" 
+                            onclick="document.getElementById('logout-form').submit();" 
+                            class="ark__profile-item ark__logout"
+                            style="cursor: pointer;">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                                    <polyline points="16 17 21 12 16 7"></polyline>
+                                    <line x1="21" y1="12" x2="9" y2="12"></line>
+                                </svg>
+                                <span>Log Out</span>
+                            </a>
+                        </form>
                     </div>
                 </div>
             </div>

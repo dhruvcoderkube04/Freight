@@ -10,7 +10,7 @@ class Commodity extends Model
     use HasFactory;
 
     protected $fillable = [
-        'shipment_id',
+        'quote_id',
         'quantity',
         'unit_type',
         'freight_class_code',
@@ -25,8 +25,8 @@ class Commodity extends Model
         'additional_services' => 'array',
     ];
 
-    public function shipment()
+    public function quote()
     {
-        return $this->belongsTo(Shipment::class);
+        return $this->belongsTo(Quote::class);
     }
 }

@@ -12,7 +12,7 @@ class TQLResponse extends Model
     protected $table = 'tql_responses'; // Explicitly set table name
 
     protected $fillable = [
-        'shipment_id',
+        'quote_id',
         'response',
         'tql_quote_id',
         'status_code',
@@ -24,8 +24,8 @@ class TQLResponse extends Model
         'response' => 'array',
     ];
 
-    public function shipment()
+    public function quote()
     {
-        return $this->belongsTo(Shipment::class);
+        return $this->belongsTo(Quote::class);
     }
 }

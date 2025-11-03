@@ -22,7 +22,7 @@
                     <div class="ark__logo ark__login-width">Log<span>in</span></div>
                     <div class="ark__auth-header ark__login-width">
                         <h1 class="ark__title">Welcome Back!</h1>
-                        <p class="ark__subtitle">Log in to access your account and manage your shipments.</p>
+                        <p class="ark__subtitle">Log in to access your account and manage your Quotes.</p>
                     </div>
 
                     {{-- Social Login Buttons --}}
