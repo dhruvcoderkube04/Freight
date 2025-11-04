@@ -33,7 +33,7 @@ class AuthController extends Controller
             return back()->withErrors($validator)->withInput();
         }
 
-        User::create([
+        $user = User::create([
             'fullname' => $request->fullname,
             'email' => $request->email,
             'password' => Hash::make($request->password),
@@ -42,7 +42,11 @@ class AuthController extends Controller
             'auto_approved' => false,
         ]);
 
-        return redirect()->route('login')->with('success', 'Registration successful! Please login.');
+        // if ($user->auto_approved) {
+            Auth::login($user);
+            return redirect()->intended('/quotes/index');
+        // }
+        // return redirect()->route('login')->with('success', 'Registration successful! Please wait for approval.');
     }
 
     /* ---------------------- Login / Logout ---------------------- */

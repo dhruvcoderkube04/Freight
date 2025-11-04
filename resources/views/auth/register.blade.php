@@ -64,8 +64,13 @@
 
             <div class="ark__form-group">
                 <label class="ark__label" for="password">Password</label>
-                <input type="password" name="password" id="password" class="ark__input"
-                       placeholder="Enter Your Password" required>
+                <div class="ark__password-wrapper">
+                    <input type="password" name="password" id="password" class="ark__input"
+                        placeholder="Enter Your Password" required>
+                    <span class="ark__password-toggle" onclick="togglePassword('password')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
                 @error('password')
                     <span class="text-danger small">{{ $message }}</span>
                 @enderror
@@ -73,8 +78,13 @@
 
             <div class="ark__form-group">
                 <label class="ark__label" for="password_confirmation">Confirm Password</label>
-                <input type="password" name="password_confirmation" id="password_confirmation"
-                       class="ark__input" placeholder="Re-enter Password" required>
+                <div class="ark__password-wrapper">
+                    <input type="password" name="password_confirmation" id="password_confirmation"
+                        class="ark__input" placeholder="Re-enter Password" required>
+                    <span class="ark__password-toggle" onclick="togglePassword('password_confirmation')">
+                        <i class="fas fa-eye"></i>
+                    </span>
+                </div>
             </div>
 
             <div class="ark__checkbox-group">
@@ -92,4 +102,21 @@
         </form>
     </div>
 </div>
+@endsection
+
+@section('scripts')
+<script>
+function togglePassword(inputId) {
+    const $passwordInput = $(`#${inputId}`);
+    const $eyeIcon = $passwordInput.next().find('i');
+    
+    if ($passwordInput.attr('type') === 'password') {
+        $passwordInput.attr('type', 'text');
+        $eyeIcon.removeClass('fa-eye').addClass('fa-eye-slash');
+    } else {
+        $passwordInput.attr('type', 'password');
+        $eyeIcon.removeClass('fa-eye-slash').addClass('fa-eye');
+    }
+}
+</script>
 @endsection
