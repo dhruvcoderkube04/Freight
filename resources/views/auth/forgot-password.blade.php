@@ -34,7 +34,7 @@
                     @endif
 
                     {{-- Forgot Password Form --}}
-                    <form method="POST" action="{{ route('password.email') }}" class="ark__login-width">
+                    <form method="POST" action="{{ route('password.email') }}" class="ark__login-width" id="forgotPasswordForm">
                         @csrf
 
                         {{-- Email Field --}}
@@ -51,8 +51,9 @@
                         </div>
 
                         {{-- Submit Button --}}
-                        <button type="submit" class="ark__submit-btn">
-                            Send Reset Link
+                        <button type="submit" class="ark__submit-btn" id="submitBtn">
+                            <span class="btn-text">Send Reset Link</span>
+                            <span class="btn-loading" style="display: none;">Sending...</span>
                         </button>
 
                         {{-- Back to Login --}}
@@ -70,4 +71,23 @@
         </div>
     </div>
 </div>
+@endsection
+@section('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('forgotPasswordForm');
+    const btn = document.getElementById('submitBtn');
+    
+    form.addEventListener('submit', function(e) {
+        const btnText = btn.querySelector('.btn-text');
+        const btnLoading = btn.querySelector('.btn-loading');
+        
+        btn.disabled = true;
+        btnText.style.display = 'none';
+        btnLoading.style.display = 'inline';
+        btn.style.cursor = 'not-allowed';
+        btn.style.opacity = '0.7';
+    });
+});
+</script>
 @endsection

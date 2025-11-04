@@ -531,6 +531,69 @@ body {
     text-decoration: underline;
 }
 
+/* ==================== Password Toggle ==================== */
+.ark__form-group {
+    position: relative;
+    margin-bottom: 1rem;
+}
+
+.ark__password-wrapper {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+}
+
+.ark__input {
+    width: 100%;
+    padding: 12px 40px 12px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    transition: border-color 0.3s ease;
+}
+
+.ark__input:focus {
+    outline: none;
+    border-color: #007bff;
+}
+
+.ark__password-toggle {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    color: #666;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+.ark__password-toggle:hover {
+    color: #333;
+}
+
+/* Show eye icon when input has value */
+.ark__password-wrapper:focus-within .ark__password-toggle,
+.ark__password-wrapper input:not(:placeholder-shown) + .ark__password-toggle {
+    opacity: 1;
+}
+
+/* Alternative method using JavaScript to show/hide */
+.ark__password-toggle.show {
+    opacity: 1;
+}
+.ark__submit-btn:disabled {
+    cursor: not-allowed;
+    opacity: 0.7;
+}
 /* ==================== Responsive Design ==================== */
 @media (max-width: 1024px) {
     .ark__form-section {

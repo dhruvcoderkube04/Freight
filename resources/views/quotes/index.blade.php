@@ -213,7 +213,7 @@
                         <div class="form-fields active" id="step1-fields">
                             <div class="form-group">
                                 <label>Pickup Location Type<span class="required">*</span></label>
-                                <select id="pickup_location" name="pickup_location" class="js-states form-control">
+                                <select id="pickup_location" name="pickup_location" required class="js-states form-control">
                                     <option value="">Select pickup location type</option>
                                     @foreach($locationTypes as $locationType)
                                         <option value="{{ $locationType->code }}">{{ $locationType->name }}</option>
@@ -225,7 +225,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Drop Location Type<span class="required">*</span></label>
-                                <select id="drop_location" name="drop_location" class="js-states form-control">
+                                <select id="drop_location" name="drop_location" required class="js-states form-control">
                                     <option value="">Select drop location type</option>
                                     @foreach($locationTypes as $locationType)
                                         <option value="{{ $locationType->code }}">{{ $locationType->name }}</option>
@@ -354,7 +354,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="pickup_country">Country <span class="required">*</span></label>
-                                <select id="pickup_country" name="country" class="js-states form-control">
+                                <select id="pickup_country" name="country" required class="js-states form-control">
                                     <option value="">Select Country</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->code }}" {{ $country->code == 'USA' ? 'selected' : '' }}>{{ $country->name }}</option>
@@ -478,7 +478,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="delivery_country">Country <span class="required">*</span></label>
-                                <select id="delivery_country" name="country" class="js-states form-control">
+                                <select id="delivery_country" name="country" required class="js-states form-control">
                                     <option value="">Select Country</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->code }}" {{ $country->code == 'USA' ? 'selected' : '' }}>{{ $country->name }}</option>
@@ -533,7 +533,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="unit_type">Unit Type<span class="required">*</span></label>
-                                <select id="unit_type" name="unit_type" class="js-states form-control">
+                                <select id="unit_type" name="unit_type" required class="js-states form-control">
                                     <option value="">Select Unit Type</option>
                                     @foreach($unitTypes as $unitType)
                                         <option value="{{ $unitType->code }}" {{ $unitType->code == 'PLT' ? 'selected' : '' }}>{{ $unitType->name }}</option>
@@ -545,7 +545,7 @@
                             </div>
                             <div class="form-group">
                                 <label for="freight_class_code">Freight Class Code<span class="required">*</span></label>
-                                <select id="freight_class_code" name="freight_class_code" class="js-states form-control">
+                                <select id="freight_class_code" name="freight_class_code" required class="js-states form-control">
                                     <option value="">Select Freight Class</option>
                                     @foreach($freightClasses as $freightClass)
                                         <option value="{{ $freightClass->code }}" {{ $freightClass->code == '110' ? 'selected' : '' }}>{{ $freightClass->code }}</option>
@@ -626,235 +626,220 @@
 </div>
 @endsection
 
+
 @push('scripts')
 <script>
-$(document).ready(function () {
-    // Initialize Tippy for tooltips
-    tippy('[tooltip]', {
-        arrow: true,
-        placement: 'top',
-        delay: 5,
-        distance: 15,
-        maxWidth: 300,
-        followCursor: true,
-        allowHTML: true,
-        theme: 'custom',
-        ignoreAttributes: true,
-        content(reference) {
-            const tooltip = reference.getAttribute('tooltip');
-            reference.removeAttribute('tooltip');
-            return tooltip;
-        },
-    });
+    $(document).ready(function () {
+        // Initialize Tippy for tooltips
+        tippy('[tooltip]', {
+            arrow: true,
+            placement: 'top',
+            delay: 5,
+            distance: 15,
+            maxWidth: 300,
+            followCursor: true,
+            allowHTML: true,
+            theme: 'custom',
+            ignoreAttributes: true,
+            content(reference) {
+                const tooltip = reference.getAttribute('tooltip');
+                reference.removeAttribute('tooltip');
+                return tooltip;
+            },
+        });
 
-    let currentStep = 1;
-    const totalSteps = 4;
+        let currentStep = 1;
+        const totalSteps = 4;
 
-    // Open Drawer
-    $('#openDrawerBtn').on('click', function () {
-        $('#sideDrawer, #drawerOverlay').fadeIn(300);
-        currentStep = 1;
-        updateStep();
-        // Set default quote date to tomorrow and update display
-        const tomorrow = new Date();
-        tomorrow.setDate(tomorrow.getDate() + 1);
-        const formattedDate = formatDate(tomorrow);
-        $('#shipment_date').val(tomorrow.toISOString().split('T')[0]);
-        $('#dateDisplay').text(formattedDate).removeClass('placeholder');
-    });
-
-    // Close Drawer
-    $('#closeDrawerBtn, #drawerOverlay, #closePopup').on('click', function () {
-        $('#sideDrawer, #drawerOverlay, #successPopup').fadeOut(300);
-    });
-
-    // Prevent closing when clicking inside drawer
-    $('#sideDrawer').on('click', function (e) {
-        e.stopPropagation();
-    });
-
-    // Next Button
-    $('#nextBtn').on('click', function () {
-        if (validateStep(currentStep)) {
-            saveStep(currentStep);
-        }
-    });
-
-    // Back Button
-    $('#backBtn').on('click', function () {
-        if (currentStep > 1) {
-            currentStep--;
+        // Open Drawer
+        $('#openDrawerBtn').on('click', function () {
+            $('#sideDrawer, #drawerOverlay').fadeIn(300);
+            currentStep = 1;
             updateStep();
-        }
-    });
+            // Set default quote date to tomorrow
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            $('#shipment_date').val(tomorrow.toISOString().split('T')[0]);
+        });
 
-    // Update Step UI
-    function updateStep() {
-        $('.wizard-step').removeClass('active');
-        $(`.wizard-step[data-step="${currentStep}"]`).addClass('active');
+        // Close Drawer
+        $('#closeDrawerBtn, #drawerOverlay, #closePopup').on('click', function () {
+            $('#sideDrawer, #drawerOverlay, #successPopup').fadeOut(300);
+        });
 
-        $('.form-fields').removeClass('active');
-        $(`#step${currentStep}-fields`).addClass('active');
+        // Prevent closing when clicking inside drawer
+        $('#sideDrawer').on('click', function (e) {
+            e.stopPropagation();
+        });
 
-        $('#backBtn').prop('disabled', currentStep === 1);
-        $('#nextBtn p').text(currentStep === totalSteps ? 'Submit' : 'Next');
-
-        // Update progress indicators
-        $('.step-number').removeClass('active completed');
-        for (let i = 1; i <= totalSteps; i++) {
-            const $step = $(`.wizard-step[data-step="${i}"] .step-number`);
-            if (i < currentStep) $step.addClass('completed');
-            if (i === currentStep) $step.addClass('active');
-        }
-    }
-
-    // Validate current step
-    function validateStep(step) {
-        let isValid = true;
-        const $fields = $(`#step${step}-fields .form-group`);
-
-        $fields.each(function () {
-            const $input = $(this).find('input, select').first();
-            const value = $input.val()?.trim();
-            const isRequired = $input.prop('required');
-            
-            if (!isRequired) {
-                $(this).removeClass('error');
-                return true;
-            }
-
-            if (isRequired && !value) {
-                showError($(this));
-                isValid = false;
-            } else {
-                hideError($(this));
+        // Next Button
+        $('#nextBtn').on('click', function () {
+            if (validateStep(currentStep)) {
+                saveStep(currentStep);
             }
         });
 
-        return isValid;
-    }
+        // Back Button
+        $('#backBtn').on('click', function () {
+            if (currentStep > 1) {
+                currentStep--;
+                updateStep();
+            }
+        });
 
-    // Show/Hide error
-    function showError($group) {
-        $group.find('.error-message').addClass('show');
-    }
-    function hideError($group) {
-        $group.find('.error-message').removeClass('show');
-    }
+        // Update Step UI
+        function updateStep() {
+            $('.wizard-step').removeClass('active');
+            $(`.wizard-step[data-step="${currentStep}"]`).addClass('active');
 
-    // Save Step via AJAX
-    function saveStep(step) {
-        const formData = new FormData($('#quoteForm')[0]);
-        let url = '';
+            $('.form-fields').removeClass('active');
+            $(`#step${currentStep}-fields`).addClass('active');
 
-        switch (step) {
-            case 1:
-                url = '{{ route("quotes.store.step1") }}';
-                break;
-            case 2:
-                url = '{{ route("quotes.store.step2") }}';
-                formData.append('quote_id', $('#quote_id').val());
-                break;
-            case 3:
-                url = '{{ route("quotes.store.step3") }}';
-                formData.append('quote_id', $('#quote_id').val());
-                break;
-            case 4:
-                url = '{{ route("quotes.store.step4") }}';
-                formData.append('quote_id', $('#quote_id').val());
-                $('#nextSpinner').removeClass('d-none');
-                $('#nextBtn').prop('disabled', true);
-                break;
+            $('#backBtn').prop('disabled', currentStep === 1);
+            $('#nextBtn p').text(currentStep === totalSteps ? 'Submit' : 'Next');
+
+            // Update progress indicators
+            $('.step-number').removeClass('active completed');
+            for (let i = 1; i <= totalSteps; i++) {
+                const $step = $(`.wizard-step[data-step="${i}"] .step-number`);
+                if (i < currentStep) $step.addClass('completed');
+                if (i === currentStep) $step.addClass('active');
+            }
         }
 
-        $.ajax({
-            url: url,
-            method: 'POST',
-            data: formData,
-            processData: false,
-            contentType: false,
-            headers: {
-                'X-Requested-With': 'XMLHttpRequest'
-            },
-            success: function (data) {
-                if (data.success) {
-                    if (step === 1 && data.quote_id) {
-                        $('#quote_id').val(data.quote_id);
-                    }
+        // Validate current step
+        function validateStep(step) {
+            let isValid = true;
+            const $fields = $(`#step${step}-fields .form-group`);
 
-                    if (step === totalSteps) {
-                        $('#nextSpinner').addClass('d-none');
-                        $('#nextBtn').prop('disabled', false);
-                        $('#sideDrawer, #drawerOverlay').fadeOut(300);
-                        $('#successPopup').fadeIn(300);
-                        // Optionally reload quotes list
-                        setTimeout(() => location.reload(), 2000);
-                    } else {
-                        currentStep = data.next_step || currentStep + 1;
-                        updateStep();
-                    }
+            $fields.each(function () {
+                const $input = $(this).find('input, select').first();
+                const value = $input.val()?.trim();
+                const isRequired = $input.prop('required');
+
+                if (isRequired && !value) {
+                    showError($(this));
+                    isValid = false;
                 } else {
-                    alert(data.message || 'Validation failed. Please check your inputs.');
+                    hideError($(this));
+                }
+            });
+
+            return isValid;
+        }
+
+        // Show/Hide error
+        function showError($group) {
+            $group.find('.error-message').addClass('show');
+        }
+        function hideError($group) {
+            $group.find('.error-message').removeClass('show');
+        }
+
+        // Save Step via AJAX
+        function saveStep(step) {
+            const formData = new FormData($('#quoteForm')[0]);
+            let url = '';
+
+            switch (step) {
+                case 1:
+                    url = '{{ route("quotes.store.step1") }}';
+                    break;
+                case 2:
+                    url = '{{ route("quotes.store.step2") }}';
+                    formData.append('quote_id', $('#quote_id').val());
+                    break;
+                case 3:
+                    url = '{{ route("quotes.store.step3") }}';
+                    formData.append('quote_id', $('#quote_id').val());
+                    break;
+                case 4:
+                    url = '{{ route("quotes.store.step4") }}';
+                    formData.append('quote_id', $('#quote_id').val());
+                    $('#nextSpinner').removeClass('d-none');
+                    $('#nextBtn').prop('disabled', true);
+                    break;
+            }
+
+            $.ajax({
+                url: url,
+                method: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                headers: {
+                    'X-Requested-With': 'XMLHttpRequest'
+                },
+                success: function (data) {
+                    if (data.success) {
+                        if (step === 1 && data.quote_id) {
+                            $('#quote_id').val(data.quote_id);
+                        }
+
+                        if (step === totalSteps) {
+                            $('#nextSpinner').addClass('d-none');
+                            $('#nextBtn').prop('disabled', false);
+                            $('#sideDrawer, #drawerOverlay').fadeOut(300);
+                            $('#successPopup').fadeIn(300);
+                            // Optionally reload quotes list
+                            setTimeout(() => location.reload(), 2000);
+                        } else {
+                            currentStep = data.next_step || currentStep + 1;
+                            updateStep();
+                        }
+                    } else {
+                        alert(data.message || 'Validation failed. Please check your inputs.');
+                        if (step === totalSteps) {
+                            $('#nextSpinner').addClass('d-none');
+                            $('#nextBtn').prop('disabled', false);
+                        }
+                    }
+                },
+                error: function () {
+                    // alert('An error occurred. Please try again.');
                     if (step === totalSteps) {
                         $('#nextSpinner').addClass('d-none');
                         $('#nextBtn').prop('disabled', false);
                     }
                 }
-            },
-            error: function () {
-                // alert('An error occurred. Please try again.');
-                if (step === totalSteps) {
-                    $('#nextSpinner').addClass('d-none');
-                    $('#nextBtn').prop('disabled', false);
+            });
+        }
+
+        // Initialize Select2 (if using)
+        if (typeof $.fn.select2 !== 'undefined') {
+            $('.js-states').select2({
+                placeholder: function () {
+                    return $(this).data('placeholder') || 'Select an option';
                 }
+            });
+        }
+
+        // Calendar Logic (Basic)
+        const $dateInput = $('#dateInputContainer');
+        const $calendar = $('#calendarPopup');
+        const $dateDisplay = $('#dateDisplay');
+        const $shipmentDate = $('#shipment_date');
+
+        $dateInput.on('click', function () {
+            $calendar.toggle();
+        });
+
+        // Close calendar when clicking outside
+        $(document).on('click', function (e) {
+            if (!$(e.target).closest('.date-picker-wrapper').length) {
+                $calendar.hide();
             }
         });
-    }
 
-    // Initialize Select2 (if using)
-    if (typeof $.fn.select2 !== 'undefined') {
-        $('.js-states').select2({
-            placeholder: function () {
-                return $(this).data('placeholder') || 'Select an option';
+        // Update display when date changes
+        $shipmentDate.on('change', function () {
+            const val = $(this).val();
+            if (val) {
+                const date = new Date(val);
+                $dateDisplay.text(date.toLocaleDateString('en-US'));
+                $dateDisplay.removeClass('placeholder');
             }
         });
-    }
-
-    // Date Picker Functionality
-    function formatDate(date) {
-        const month = String(date.getMonth() + 1).padStart(2, '0');
-        const day = String(date.getDate()).padStart(2, '0');
-        const year = date.getFullYear();
-        return `${month}/${day}/${year}`;
-    }
-
-    // Initialize date display
-    function initializeDateDisplay() {
-        const shipmentDate = $('#shipment_date').val();
-        if (shipmentDate) {
-            const date = new Date(shipmentDate);
-            $('#dateDisplay').text(formatDate(date)).removeClass('placeholder');
-        }
-    }
-
-    // Update date display when date changes
-    $('#shipment_date').on('change', function () {
-        const val = $(this).val();
-        if (val) {
-            const date = new Date(val);
-            $('#dateDisplay').text(formatDate(date)).removeClass('placeholder');
-        } else {
-            $('#dateDisplay').text('MM/DD/YYYY').addClass('placeholder');
-        }
     });
-
-    // Open native date picker when clicking on the display
-    $('#dateInputContainer').on('click', function() {
-        $('#shipment_date')[0].showPicker();
-    });
-
-    // Initialize date display on page load
-    initializeDateDisplay();
-});
 </script>
 @endpush
