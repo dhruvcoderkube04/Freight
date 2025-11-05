@@ -156,7 +156,7 @@ body {
 .ark__logo {
     font-size: var(--h2);
     font-weight: var(--font-weight-bold);
-    color: var(--secondary-green-color);
+    color: var(--primary-brick-red);
     margin-bottom: 2.5rem;
     line-height: 1.2;
     font-family: var(--font-nunito-sans);
@@ -460,7 +460,7 @@ body {
     background: #0f8a2f;
 } */
 .ark__submit-btn {
-    background: var(--secondary-green-color);
+    background: var(--primary-brick-red);
     color: var(--white-color);
     border: none;
     padding: 0.813rem;
@@ -499,7 +499,7 @@ body {
 .ark__submit-btn:hover {
     transform: translateY(-4px);
     box-shadow: 0 8px 20px rgba(15, 138, 47, 0.3);
-    background: #0f8a2f;
+    background: #C04657;
 }
 
 .ark__submit-btn:hover::before {

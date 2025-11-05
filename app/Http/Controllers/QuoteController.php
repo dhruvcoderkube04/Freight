@@ -56,206 +56,159 @@ class QuoteController extends Controller
         return view('quotes.show', compact('quote', 'latestResponse', 'locationTypes'));
     }
 
-    public function storeStep1(Request $request)
+    public function storeQuote(Request $request)
     {
-        // $validated = $request->validate([
-        //     'pickup_location' => 'required|string|in:commercial,residential,limited_access,trade_show',
-        //     'drop_location' => 'required|string|in:commercial,residential,limited_access,trade_show',
-        //     'shipment_date' => 'required|date|after_or_equal:today',
-        // ]);
+        $validated = $request->validate([
+            // Step 1
+            'pickup_location' => 'required|string|in:commercial,residential,limited_access,trade_show',
+            'drop_location' => 'required|string|in:commercial,residential,limited_access,trade_show',
+            'shipment_date' => 'required|date|after_or_equal:today',
 
-        $quote = Quote::updateOrCreate(
-            ['id' => $request->quote_id],
-            [
+            // Step 2 - Pickup
+            'pickup_city' => 'required|string|max:255',
+            'pickup_state' => 'required|string|size:2',
+            'pickup_postal_code' => 'required|string|regex:/^\d{5}(-\d{4})?$/',
+            'pickup_country' => 'required|string|in:USA,CAN,MEX',
+            'pickup_address_1' => 'required|string|max:50',
+            'pickup_address_2' => 'nullable|string|max:50',
+            'pickup_contact_number' => 'required|string|regex:/^\+?1?\d{10}$/',
+
+            // Step 3 - Delivery
+            'delivery_city' => 'required|string|max:255',
+            'delivery_state' => 'required|string|size:2',
+            'delivery_postal_code' => 'required|string|regex:/^\d{5}(-\d{4})?$/',
+            'delivery_country' => 'required|string|in:USA,CAN,MEX',
+            'delivery_address_1' => 'required|string|max:50',
+            'delivery_address_2' => 'nullable|string|max:50',
+            // 'delivery_contact_number' => 'nullable|string|regex:/^\+?1?\d{10}$/',
+
+            // Step 4 - Commodities
+            'quantity' => 'required|integer|min:1|max:315',
+            'unit_type' => 'required|string',
+            'freight_class_code' => 'required|string',
+            'weight' => 'required|numeric|min:0.1',
+            'length' => 'required|integer|min:1|max:636',
+            'width' => 'required|integer|min:1|max:102',
+            'height' => 'required|integer|min:1|max:102',
+            'additional_services' => 'nullable|array',
+            'additional_services.*' => 'in:devanning,labeling,transshipment',
+        ]);
+
+        DB::beginTransaction();
+        try {
+            // 1. Create Quote
+            $quote = Quote::create([
                 'user_id' => Auth::id(),
                 'pickup_location' => $request->pickup_location,
                 'drop_location' => $request->drop_location,
                 'shipment_date' => $request->shipment_date,
-            ]
-        );
+                'status' => 'processing',
+            ]);
 
-        return response()->json([
-            'success' => true,
-            'quote_id' => $quote->id,
-            'next_step' => 2
-        ]);
-    }
+            // 2. Pickup Detail
+            PickupDetail::create([
+                'quote_id' => $quote->id,
+                'city' => $request->pickup_city,
+                'state' => $request->pickup_state,
+                'postal_code' => $request->pickup_postal_code,
+                'country' => $request->pickup_country,
+                'address_1' => $request->pickup_address_1,
+                'address_2' => $request->pickup_address_2,
+                'contact_number' => $request->pickup_contact_number,
+            ]);
 
-    public function storeStep2(Request $request)
-    {
-        // $validated = $request->validate([
-        //     'quote_id' => 'required|exists:quotes,id',
-        //     'city' => 'required|string|max:255',
-        //     'state' => 'required|string|size:2',
-        //     'postal_code' => 'required|string|regex:/^\d{5}(-\d{4})?$/',
-        //     'country' => 'required|string|in:USA,CAN,MEX',
-        //     'address_1' => 'nullable|string|max:50',
-        //     'address_2' => 'nullable|string|max:50',
-        //     'contact_number' => 'nullable|string|regex:/^\+?1?\d{10}$/',
-        // ]);
+            // 3. Delivery Detail
+            DeliveryDetail::create([
+                'quote_id' => $quote->id,
+                'city' => $request->delivery_city,
+                'state' => $request->delivery_state,
+                'postal_code' => $request->delivery_postal_code,
+                'country' => $request->delivery_country,
+                'address_1' => $request->delivery_address_1,
+                'address_2' => $request->delivery_address_2,
+                // 'contact_number' => $request->delivery_contact_number,
+            ]);
 
-        $quote = Quote::where('id', $request->quote_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
+            // 4. Commodity
+            Commodity::create([
+                'quote_id' => $quote->id,
+                'quantity' => $request->quantity,
+                'unit_type' => $request->unit_type,
+                'freight_class_code' => $request->freight_class_code,
+                'weight' => $request->weight,
+                'length' => $request->length,
+                'width' => $request->width,
+                'height' => $request->height,
+                'additional_services' => $request->additional_services,
+            ]);
 
-        PickupDetail::updateOrCreate(
-            ['quote_id' => $request->quote_id],
-            [
-                'city' => $request->city ?? 'Not provided',
-                'state' => $request->state ?? 'Not provided',
-                'postal_code' => $request->postal_code ?? 'Not provided',
-                'country' => $request->country ?? 'Not provided',
-                'address_1' => $request->address_1 ?? 'Not provided',
-                'address_2' => $request->address_2,
-                'contact_number' => $request->contact_number ?? 'Not provided',
-            ]
-        );
-
-        return response()->json([
-            'success' => true,
-            'next_step' => 3
-        ]);
-    }
-
-    public function storeStep3(Request $request)
-    {
-        // $validated = $request->validate([
-        //     'quote_id' => 'required|exists:quotes,id',
-        //     'city' => 'required|string|max:255',
-        //     'state' => 'required|string|size:2',
-        //     'postal_code' => 'required|string|regex:/^\d{5}(-\d{4})?$/',
-        //     'country' => 'required|string|in:USA,CAN,MEX',
-        //     'address_1' => 'nullable|string|max:50',
-        //     'address_2' => 'nullable|string|max:50',
-        //     'contact_number' => 'nullable|string|regex:/^\+?1?\d{10}$/',
-        // ]);
-
-        $quote = Quote::where('id', $request->quote_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        DeliveryDetail::updateOrCreate(
-            ['quote_id' => $request->quote_id],
-            [
-                'city' => $request->city ?? 'Not provided',
-                'state' => $request->state ?? 'Not provided',
-                'postal_code' => $request->postal_code ?? 'Not provided',
-                'country' => $request->country ?? 'Not provided',
-                'address_1' => $request->address_1 ?? 'Not provided',
-                'address_2' => $request->address_2,
-                'contact_number' => $request->contact_number ?? 'Not provided',
-            ]
-        );
-
-        return response()->json([
-            'success' => true,
-            'next_step' => 4
-        ]);
-    }
-
-    public function storeStep4(Request $request)
-    {
-        // $validated = $request->validate([
-        //     'quote_id' => 'required|exists:quotes,id',
-        //     'quantity' => 'required|integer|min:1|max:315',
-        //     'unit_type' => 'required|string|in:pallet,carton,crate,box,bundle,drum,roll,case,piece',
-        //     'freight_class_code' => 'required|string|in:50,55,60,65,70,77.5,85,92.5,100,110,125,150,175,200,250,300,400,500',
-        //     'weight' => 'required|numeric|min:0.1',
-        //     'length' => 'required|integer|min:1|max:636',
-        //     'width' => 'required|integer|min:1|max:102',
-        //     'height' => 'required|integer|min:1|max:102',
-        //     'additional_services' => 'nullable|array',
-        //     'additional_services.*' => 'string|in:devanning,labelling,transshipment',
-        // ]);
-
-        $quote = Quote::where('id', $request->quote_id)
-            ->where('user_id', Auth::id())
-            ->firstOrFail();
-
-        Commodity::create([
-            'quote_id' => $request->quote_id,
-            'quantity' => $request->quantity ?? 1,
-            'unit_type' => $request->unit_type ?? 'pallet',
-            'freight_class_code' => $request->freight_class_code ?? '110',
-            'weight' => $request->weight ?? 100,
-            'length' => $request->length ?? 48,
-            'width' => $request->width ?? 48,
-            'height' => $request->height ?? 48,
-            'additional_services' => $request->additional_services ? json_encode($request->additional_services) : null,
-        ]);
-
-        $quote = Quote::with(['pickupDetail', 'deliveryDetail', 'commodities'])
-            ->where('user_id', Auth::id())
-            ->find($request->quote_id);
-
-        $tqlService = new TQLApiService();
-        $commodity = $quote->commodities->first();
-
-        $apiData = [
-            'pickup_location' => $quote->pickup_location,
-            'drop_location' => $quote->drop_location,
-            'shipment_date' => $quote->shipment_date,
-            'pickup_city' => $quote->pickupDetail->city,
-            'pickup_state' => $quote->pickupDetail->state,
-            'pickup_postal_code' => $quote->pickupDetail->postal_code,
-            'pickup_country' => $quote->pickupDetail->country ?? 'USA',
-            'delivery_city' => $quote->deliveryDetail->city,
-            'delivery_state' => $quote->deliveryDetail->state,
-            'delivery_postal_code' => $quote->deliveryDetail->postal_code,
-            'delivery_country' => $quote->deliveryDetail->country ?? 'USA',
-            'quantity' => $commodity->quantity,
-            'unit_type' => $commodity->unit_type,
-            'freight_class_code' => $commodity->freight_class_code,
-            'weight' => $commodity->weight,
-            'length' => $commodity->length,
-            'width' => $commodity->width,
-            'height' => $commodity->height,
-            'additional_services' => $commodity->additional_services ? json_decode($commodity->additional_services, true) : [],
-        ];
-
-        $quoteData = $tqlService->formatQuoteData($apiData);
-
-        try {
-            $apiResponse = $tqlService->createQuote($quoteData);
-        } catch (\Exception $e) {
-            // Handle timeout or other exceptions
-            $apiResponse = [
-                'error' => 'API request timed out or failed',
-                'exception' => $e->getMessage(),
-                'status_code' => 408 // Request Timeout
+            // 5. Call TQL API
+            $tqlService = new TQLApiService();
+            $apiData = [
+                'pickup_location' => $quote->pickup_location,
+                'drop_location' => $quote->drop_location,
+                'shipment_date' => $quote->shipment_date,
+                'pickup_city' => $request->pickup_city,
+                'pickup_state' => $request->pickup_state,
+                'pickup_postal_code' => $request->pickup_postal_code,
+                'pickup_country' => $request->pickup_country,
+                'delivery_city' => $request->delivery_city,
+                'delivery_state' => $request->delivery_state,
+                'delivery_postal_code' => $request->delivery_postal_code,
+                'delivery_country' => $request->delivery_country,
+                'quantity' => $request->quantity,
+                'unit_type' => $request->unit_type,
+                'freight_class_code' => $request->freight_class_code,
+                'weight' => $request->weight,
+                'length' => $request->length,
+                'width' => $request->width,
+                'height' => $request->height,
+                'additional_services' => $request->additional_services ?? [],
             ];
-        }
 
-        // Store API response in tql_responses table
-        $tqlResponse = TQLResponse::create([
-            'quote_id' => $quote->id,
-            'response' => $apiResponse,
-            'tql_quote_id' => $apiResponse['quoteId'] ?? $apiResponse['id'] ?? null,
-            'status_code' => $apiResponse['status_code'] ?? (isset($apiResponse['error']) ? 400 : 200),
-            'status' => isset($apiResponse['error']) ? 'failed' : 'success',
-            'error_message' => $apiResponse['error'] ?? null,
-        ]);
+            $quoteData = $tqlService->formatQuoteData($apiData);
 
-        if (isset($apiResponse['error']) || is_null($apiResponse)) {
-            $quote->update(['status' => 'failed']);
+            try {
+                $apiResponse = $tqlService->createQuote($quoteData);
+            } catch (\Exception $e) {
+                $apiResponse = [
+                    'error' => 'API request failed',
+                    'exception' => $e->getMessage(),
+                    'status_code' => 408
+                ];
+            }
+
+            // 6. Save TQL Response
+            TQLResponse::create([
+                'quote_id' => $quote->id,
+                'response' => $apiResponse,
+                'tql_quote_id' => $apiResponse['quoteId'] ?? null,
+                'status_code' => $apiResponse['status_code'] ?? (isset($apiResponse['error']) ? 400 : 200),
+                'status' => isset($apiResponse['error']) ? 'failed' : 'success',
+                'error_message' => $apiResponse['error'] ?? null,
+            ]);
+
+            $quote->update(['status' => isset($apiResponse['error']) ? 'failed' : 'completed']);
+
+            DB::commit();
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Quote created successfully!',
+                'quote_id' => encrypt($quote->id),
+                'redirect' => route('quotes.show', encrypt($quote->id))
+            ]);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+            \Log::error('Quote creation failed', ['error' => $e->getMessage()]);
+            
             return response()->json([
                 'success' => false,
-                'message' => 'Quote saved but API call failed',
-                'api_response' => $apiResponse,
-                'tql_response_id' => $tqlResponse->id,
-                'error_details' => $apiResponse['error'] ?? 'API response was null'
-            ]);
+                'message' => 'Failed to create quote. Please try again.',
+                'error' => $e->getMessage()
+            ], 500);
         }
-
-        $quote->update(['status' => 'completed']);
-
-        return response()->json([
-            'success' => true,
-            'message' => 'Quote Generated Successfully!',
-            'api_response' => $apiResponse,
-            'tql_response_id' => $tqlResponse->id,
-            'quote_id' => $tqlResponse->tql_quote_id
-        ]);
     }
 
     // Optional: Method to get TQL response for a Quote

@@ -131,7 +131,7 @@
                                 </div>
                                 <div class="col-md-8">
                                     <strong>Additional Services:</strong> 
-                                    {{ $commodity->additional_services ? implode(', ', json_decode($commodity->additional_services, true)) : 'None' }}
+                                    {{ $commodity->additional_services ? implode(', ', $commodity->additional_services) : 'None' }}
                                 </div>
                             </div>
                         </div>
