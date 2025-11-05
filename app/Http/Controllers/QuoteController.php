@@ -13,6 +13,7 @@ use App\Models\TQLResponse;
 use App\Models\UnitType;
 use App\Models\Payment;
 use App\Services\TQLApiService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -21,22 +22,37 @@ class QuoteController extends Controller
 {
     public function index()
     {
-        $locationTypes = LocationType::where('is_active', true)->orderBy('sort_order')->get();
-        $countries = CountryCode::where('is_active', true)->orderBy('sort_order')->get();
-        $unitTypes = UnitType::where('is_active', true)->orderBy('sort_order')->get();
-        $freightClasses = FreightClassCode::where('is_active', true)->orderBy('sort_order')->get();
+        $locationTypes   = LocationType::where('is_active', true)->orderBy('sort_order')->get();
+        $countries       = CountryCode::where('is_active', true)->orderBy('sort_order')->get();
+        $unitTypes       = UnitType::where('is_active', true)->orderBy('sort_order')->get();
+        $freightClasses  = FreightClassCode::where('is_active', true)->orderBy('sort_order')->get();
 
-        $quotes = Quote::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
+        $quotes = Quote::with(['tqlResponses', 'pickupDetail', 'deliveryDetail'])
             ->where('user_id', Auth::id())
             ->orderBy('created_at', 'desc')
             ->get();
 
+        $carrierData = [];
+            foreach ($quotes as $quote) {
+                $resp = $quote->tqlResponses->last();
+                if ($resp?->status === 'success') {
+                    foreach ($resp->response['content']['carrierPrices'] as $price) {
+                        $carrierData[] = [
+                            'quote_id'      => $quote->id,
+                            'booking_id'    => $price['carrierQuoteId'] ?? '—',
+                            'warehouse'     => $price['carrier'] ?? '—',
+                            'storage'       => $price['serviceLevel'] ?? 'Standard',
+                            'total_amount'  => $price['customerRate'],
+                            'total_space'   => $price['transitDays'] . ' day' . ($price['transitDays'] > 1 ? 's' : ''),
+                            'booking_status' => ucfirst($quote->status),
+                            'payment_status' => $quote->status,
+                        ];
+                    }
+                }
+            }
+
         return view('quotes.index', compact(
-            'locationTypes',
-            'countries',
-            'unitTypes',
-            'freightClasses',
-            'quotes'
+            'locationTypes', 'countries', 'unitTypes', 'freightClasses', 'quotes', 'carrierData'
         ));
     }
 

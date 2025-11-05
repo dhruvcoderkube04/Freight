@@ -17,138 +17,25 @@
     
 @if ($quotes->count() > 0)
     <div class="row g-4">
-        @foreach ($quotes as $quote)
-            @php
-                $latestResponse = $quote->tqlResponses->last();
-                $carrierCount   = $latestResponse && isset($latestResponse->response['content']['carrierPrices'])
-                                 ? count($latestResponse->response['content']['carrierPrices'])
-                                 : 0;
-                $lowestPrice    = $latestResponse && isset($latestResponse->response['content']['carrierPrices'])
-                                 ? min(array_column($latestResponse->response['content']['carrierPrices'], 'customerRate'))
-                                 : 0;
-            @endphp
-
-            <div class="col-lg-6 col-xxl-4">
-                <!-- ==== CARD ==== -->
-                <div class="card h-100 shadow-sm border-0 quote-card">
-                    <!-- Header – Quote # + Status -->
-                    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-semibold text-primary">
-                            Quote #{{ $quote->id }}
-                        </h5>
-
-                        <span class="badge rounded-pill px-3 py-2
-                            {{ $quote->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
-                            {{ ucfirst($quote->status) }}
-                        </span>
-                    </div>
-
-                    <!-- Body -->
-                    <div class="card-body pt-2">
-
-                        <!-- ==== LOCATION TYPES ==== -->
-                        <div class="row mb-3 text-center text-md-start">
-                            <div class="col-6">
-                                <small class="text-muted d-block">Pickup</small>
-                                <p class="mb-0 fw-bold text-primary">
-                                    {{ $locationTypes->firstWhere('code', $quote->pickup_location)->name
-                                        ?? ucfirst($quote->pickup_location) }}
-                                </p>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Delivery</small>
-                                <p class="mb-0 fw-bold text-success">
-                                    {{ $locationTypes->firstWhere('code', $quote->drop_location)->name
-                                        ?? ucfirst($quote->drop_location) }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- ==== ADDRESS SUMMARY ==== -->
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <small class="text-muted d-block">From</small>
-                                @if ($quote->pickupDetail && $quote->pickupDetail->city)
-                                    <p class="mb-0 fw-semibold">
-                                        {{ $quote->pickupDetail->city }}, {{ $quote->pickupDetail->state }}
-                                    </p>
-                                    @if ($quote->pickupDetail->postal_code)
-                                        <small class="text-muted">{{ $quote->pickupDetail->postal_code }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted fst-italic">—</span>
-                                @endif
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">To</small>
-                                @if ($quote->deliveryDetail && $quote->deliveryDetail->city)
-                                    <p class="mb-0 fw-semibold">
-                                        {{ $quote->deliveryDetail->city }}, {{ $quote->deliveryDetail->state }}
-                                    </p>
-                                    @if ($quote->deliveryDetail->postal_code)
-                                        <small class="text-muted">{{ $quote->deliveryDetail->postal_code }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted fst-italic">—</span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- ==== DATES ==== -->
-                        <div class="row mb-3 text-muted small">
-                            <div class="col-6">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                {{ \Carbon\Carbon::parse($quote->shipment_date)->format('M d, Y') }}
-                            </div>
-                            <div class="col-6">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ $quote->created_at->format('M d, Y') }}
-                            </div>
-                        </div>
-
-                        <!-- ==== QUOTE RESULT ==== -->
-                        @if ($latestResponse && $latestResponse->status === 'success')
-                            <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-semibold text-dark">Best Price</span>
-                                    <span class="h4 text-success mb-0 fw-bold">
-                                        ${{ number_format($lowestPrice, 2) }}
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between small text-muted">
-                                    <span>Carrier Options</span>
-                                    <span class="fw-semibold">{{ $carrierCount }} carrier{{ $carrierCount != 1 ? 's' : '' }}</span>
-                                </div>
-                            </div>
-                        @elseif ($latestResponse && $latestResponse->status === 'failed')
-                            <div class="alert alert-danger p-2 mb-0 small">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                Quote generation failed
-                            </div>
-                        @else
-                            <div class="alert alert-warning p-2 mb-0 small">
-                                <i class="fas fa-clock me-1"></i>
-                                Quote in progress…
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Footer – CTA -->
-                    <div class="card-footer bg-transparent border-0 pt-0">
-                        @if ($latestResponse && $latestResponse->status === 'success')
-                        @php
-                        $quote_id = encrypt($quote->id);
-                        @endphp
-                            <a href="{{ route('quotes.show',$quote_id) }}"
-                               class="btn btn-success w-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-credit-card me-2"></i> Book Now
-                            </a>
-                        @endif
-                    </div>
-                </div>
-                <!-- ==== END CARD ==== -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body p-0">
+                <table id="quotesTable" class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Warehouse Name</th>
+                            <th>Storage</th>
+                            <th>Total Space</th>
+                            <th>Booking Period</th>
+                            <th>Total Amount</th>
+                            <th>Booking Status</th>
+                            <th>Payment Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
-        @endforeach
+        </div>
     </div>
 @else
     <!-- Empty State -->
@@ -626,8 +513,73 @@
 </div>
 @endsection
 
-
 @push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    $('#quotesTable').DataTable({
+        data: @json($carrierData),
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        responsive: true,
+        order: [[3, 'asc']],
+        language: {
+            search: "Search quotes:",
+            info: "Showing _START_ to _END_ of _TOTAL_ rates",
+            paginate: { previous: "Prev", next: "Next" }
+        },
+        columns: [
+            {
+                data: null,
+                title: "Freight Quote",
+                render: (data) => `${data.booking_id || '—'}`
+            },
+            {
+                data: 'warehouse',
+                title: "Carrier"
+            },
+            {
+                data: 'storage',
+                title: "Service Level"
+            },
+            {
+                data: 'total_amount',
+                title: "Base Rate ($)",
+                render: (data) => '$' + parseFloat(data).toFixed(2)
+            },
+            {
+                data: 'total_amount',
+                title: "Final Rate ($)",
+                render: (data) => '<strong>$' + parseFloat(data).toFixed(2) + '</strong>'
+            },
+            {
+                data: 'total_space',
+                title: "Estimated Delivery"
+            },
+            {
+                data: 'booking_status',
+                title: "Status",
+                render: () => '<span class="badge bg-warning text-dark">Pending</span>'
+            },
+            {
+                data: 'payment_status',
+                title: "Payment Status",
+                render: () => '<span class="badge bg-secondary">Proceed To Payment</span>'
+            },
+            {
+                data: null,
+                title: "Tracking",
+                orderable: false,
+                render: (row) => `
+                    <button class="btn btn-sm btn-outline-primary tracking-btn" 
+                            data-id="${row.quote_id}">
+                        View
+                    </button>
+                `
+            }
+        ]
+    });
+});
+</script>
 <script>
     // Fixed and optimized script for quote form
     document.addEventListener('DOMContentLoaded', function () {

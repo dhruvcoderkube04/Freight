@@ -74,7 +74,7 @@
                 </button>
 
                 <div class="ark__profile-menu" id="arkProfileMenu">
-                    <div class="ark__profile-header">
+                    <div class="ark__profile-header"> 
                         <img src="{{ Auth::user()->avatar ?? asset('assets/images/no-profile.png') }}" alt="Profile" class="ark__profile-image">
                         <h3>{{ Auth::user()->fullname }}</h3>
                         <p class="mb-0">{{ Auth::user()->email }}</p>
