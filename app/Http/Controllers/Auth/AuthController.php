@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
-use Laravel\Socialite\Facades\Socialite;
+use Laravel\Socialite\Socialite;
+
 
 class AuthController extends Controller
 {

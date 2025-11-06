@@ -32,113 +32,113 @@ function custom_dropdown() {
 }
 custom_dropdown()
 
-function smartWizard() {
-    let currentStep = 1;
-    const totalSteps = 4;
+// function smartWizard() {
+//     let currentStep = 1;
+//     const totalSteps = 4;
 
-    const nextBtn = document.getElementById('nextBtn');
-    const backBtn = document.getElementById('backBtn');
-    const wizardSteps = document.querySelectorAll('.wizard-step');
-    const formFields = document.querySelectorAll('.form-fields');
+//     const nextBtn = document.getElementById('nextBtn');
+//     const backBtn = document.getElementById('backBtn');
+//     const wizardSteps = document.querySelectorAll('.wizard-step');
+//     const formFields = document.querySelectorAll('.form-fields');
 
-    function validateStep(step) {
-        const fields = document.querySelectorAll(`#step${step}-fields input, #step${step}-fields select`);
-        let isValid = true;
+//     function validateStep(step) {
+//         const fields = document.querySelectorAll(`#step${step}-fields input, #step${step}-fields select`);
+//         let isValid = true;
 
-        fields.forEach(field => {
-            const formGroup = field.closest('.form-group');
-            if (!field.value.trim()) {
-                formGroup.classList.add('error');
-                isValid = false;
-            } else {
-                formGroup.classList.remove('error');
-            }
-        });
+//         fields.forEach(field => {
+//             const formGroup = field.closest('.form-group');
+//             if (!field.value.trim()) {
+//                 formGroup.classList.add('error');
+//                 isValid = false;
+//             } else {
+//                 formGroup.classList.remove('error');
+//             }
+//         });
 
-        return isValid;
-    }
+//         return isValid;
+//     }
 
-    function updateStepDisplay() {
-        wizardSteps.forEach((step, index) => {
-            const stepNum = index + 1;
-            if (stepNum < currentStep) {
-                step.classList.add('completed');
-                step.classList.remove('active');
-            } else if (stepNum === currentStep) {
-                step.classList.add('active');
-                step.classList.remove('completed');
-            } else {
-                step.classList.remove('active', 'completed');
-            }
-        });
+//     function updateStepDisplay() {
+//         wizardSteps.forEach((step, index) => {
+//             const stepNum = index + 1;
+//             if (stepNum < currentStep) {
+//                 step.classList.add('completed');
+//                 step.classList.remove('active');
+//             } else if (stepNum === currentStep) {
+//                 step.classList.add('active');
+//                 step.classList.remove('completed');
+//             } else {
+//                 step.classList.remove('active', 'completed');
+//             }
+//         });
 
-        formFields.forEach((field, index) => {
-            if (index + 1 === currentStep) {
-                field.classList.add('active');
-            } else {
-                field.classList.remove('active');
-            }
-        });
+//         formFields.forEach((field, index) => {
+//             if (index + 1 === currentStep) {
+//                 field.classList.add('active');
+//             } else {
+//                 field.classList.remove('active');
+//             }
+//         });
 
-        backBtn.disabled = currentStep === 1;
-        // nextBtn.textContent = currentStep === totalSteps ? `Submit` : 'Next';
-        if (currentStep === totalSteps) {
-            nextBtn.innerHTML = `<p>Submit</p> <img src="/assets/images/next-arrow.svg" alt="Submit">`;
-          } else {
-            nextBtn.innerHTML = `<p>Next</p> <img src="/assets/images/next-arrow.svg" alt="Next">`;
-          }
-    }
+//         backBtn.disabled = currentStep === 1;
+//         // nextBtn.textContent = currentStep === totalSteps ? `Submit` : 'Next';
+//         if (currentStep === totalSteps) {
+//             nextBtn.innerHTML = `<p>Submit</p> <img src="/assets/images/next-arrow.svg" alt="Submit">`;
+//           } else {
+//             nextBtn.innerHTML = `<p>Next</p> <img src="/assets/images/next-arrow.svg" alt="Next">`;
+//           }
+//     }
 
-    // nextBtn.addEventListener('click', () => {
-    //     if (validateStep(currentStep)) {
-    //         if (currentStep < totalSteps) {
-    //             currentStep++;
-    //             updateStepDisplay();
-    //         } else {
-    //             alert('Form submitted successfully!');
-    //         }
-    //     }
-    // });
+//     // nextBtn.addEventListener('click', () => {
+//     //     if (validateStep(currentStep)) {
+//     //         if (currentStep < totalSteps) {
+//     //             currentStep++;
+//     //             updateStepDisplay();
+//     //         } else {
+//     //             alert('Form submitted successfully!');
+//     //         }
+//     //     }
+//     // });
 
-    nextBtn.addEventListener('click', () => {
-        if (validateStep(currentStep)) {
-          if (currentStep < totalSteps) {
-            currentStep++;
-            updateStepDisplay();
-          } else {
-            // 👇 Show popup instead of alert
-            const popup = document.getElementById('successPopup');
-            popup.classList.add('active');
-            setTimeout(() => popup.classList.remove('active'), 4000);
-          }
-        }
-      });
+//     nextBtn.addEventListener('click', () => {
+//         if (validateStep(currentStep)) {
+//           if (currentStep < totalSteps) {
+//             currentStep++;
+//             updateStepDisplay();
+//           } else {
+//             // 👇 Show popup instead of alert
+//             const popup = document.getElementById('successPopup');
+//             popup.classList.add('active');
+//             setTimeout(() => popup.classList.remove('active'), 4000);
+//           }
+//         }
+//       });
       
-      // Close popup
-      document.getElementById('closePopup').addEventListener('click', () => {
-        document.getElementById('successPopup').classList.remove('active');
-      });
+//       // Close popup
+//       document.getElementById('closePopup').addEventListener('click', () => {
+//         document.getElementById('successPopup').classList.remove('active');
+//       });
 
-    backBtn.addEventListener('click', () => {
-        if (currentStep > 1) {
-            currentStep--;
-            updateStepDisplay();
-        }
-    });
+//     backBtn.addEventListener('click', () => {
+//         if (currentStep > 1) {
+//             currentStep--;
+//             updateStepDisplay();
+//         }
+//     });
 
-    // Remove error state on input
-    document.querySelectorAll('input, select').forEach(field => {
-        field.addEventListener('input', () => {
-            const formGroup = field.closest('.form-group');
-            if (field.value.trim()) {
-                formGroup.classList.remove('error');
-            }
-        });
-    });
+//     // Remove error state on input
+//     document.querySelectorAll('input, select').forEach(field => {
+//         field.addEventListener('input', () => {
+//             const formGroup = field.closest('.form-group');
+//             if (field.value.trim()) {
+//                 formGroup.classList.remove('error');
+//             }
+//         });
+//     });
 
-    updateStepDisplay();
-}
-smartWizard()
+//     updateStepDisplay();
+// }
+// smartWizard()
 
 function NotificationLogic() {
     // Notification Logic

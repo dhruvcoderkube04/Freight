@@ -69,15 +69,15 @@
             <!-- Profile -->
             <div class="ark__profile-container">
                 <button class="ark__profile-button" id="arkProfileBtn">
-                    <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop" alt="Profile" class="ark__profile-image">
+                    <img src="{{ Auth::user()->avatar ?? asset('assets/images/no-profile.png') }}" alt="Profile" class="ark__profile-image">
                     <img src="{{ asset('assets/images/down-arrow.svg') }}" alt="">
                 </button>
 
                 <div class="ark__profile-menu" id="arkProfileMenu">
-                    <div class="ark__profile-header">
-                        <img src="https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=200&h=200&fit=crop" alt="Profile">
-                        <h3>Sarah Johnson</h3>
-                        <p>sarah.johnson@email.com</p>
+                    <div class="ark__profile-header"> 
+                        <img src="{{ Auth::user()->avatar ?? asset('assets/images/no-profile.png') }}" alt="Profile" class="ark__profile-image">
+                        <h3>{{ Auth::user()->fullname }}</h3>
+                        <p class="mb-0">{{ Auth::user()->email }}</p>
                     </div>
 
                     <div class="ark__profile-items">

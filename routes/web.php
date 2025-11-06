@@ -29,10 +29,7 @@ Route::controller(AuthController::class)->group(function () {
 // Protected routes
 Route::middleware(['auth', 'session.timeout'])->group(function () {
     Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
-    Route::post('/quotes/step1', [QuoteController::class, 'storeStep1'])->name('quotes.store.step1');
-    Route::post('/quotes/step2', [QuoteController::class, 'storeStep2'])->name('quotes.store.step2');
-    Route::post('/quotes/step3', [QuoteController::class, 'storeStep3'])->name('quotes.store.step3');
-    Route::post('/quotes/step4', [QuoteController::class, 'storeStep4'])->name('quotes.store.step4');
+    Route::post('/quotes/store', [QuoteController::class, 'storeQuote'])->name('quotes.store');
 
     Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
     Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');

@@ -17,138 +17,25 @@
     
 @if ($quotes->count() > 0)
     <div class="row g-4">
-        @foreach ($quotes as $quote)
-            @php
-                $latestResponse = $quote->tqlResponses->last();
-                $carrierCount   = $latestResponse && isset($latestResponse->response['content']['carrierPrices'])
-                                 ? count($latestResponse->response['content']['carrierPrices'])
-                                 : 0;
-                $lowestPrice    = $latestResponse && isset($latestResponse->response['content']['carrierPrices'])
-                                 ? min(array_column($latestResponse->response['content']['carrierPrices'], 'customerRate'))
-                                 : 0;
-            @endphp
-
-            <div class="col-lg-6 col-xxl-4">
-                <!-- ==== CARD ==== -->
-                <div class="card h-100 shadow-sm border-0 quote-card">
-                    <!-- Header – Quote # + Status -->
-                    <div class="card-header bg-white border-0 d-flex justify-content-between align-items-center py-3">
-                        <h5 class="mb-0 fw-semibold text-primary">
-                            Quote #{{ $quote->id }}
-                        </h5>
-
-                        <span class="badge rounded-pill px-3 py-2
-                            {{ $quote->status === 'completed' ? 'bg-success' : 'bg-warning' }}">
-                            {{ ucfirst($quote->status) }}
-                        </span>
-                    </div>
-
-                    <!-- Body -->
-                    <div class="card-body pt-2">
-
-                        <!-- ==== LOCATION TYPES ==== -->
-                        <div class="row mb-3 text-center text-md-start">
-                            <div class="col-6">
-                                <small class="text-muted d-block">Pickup</small>
-                                <p class="mb-0 fw-bold text-primary">
-                                    {{ $locationTypes->firstWhere('code', $quote->pickup_location)->name
-                                        ?? ucfirst($quote->pickup_location) }}
-                                </p>
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">Delivery</small>
-                                <p class="mb-0 fw-bold text-success">
-                                    {{ $locationTypes->firstWhere('code', $quote->drop_location)->name
-                                        ?? ucfirst($quote->drop_location) }}
-                                </p>
-                            </div>
-                        </div>
-
-                        <!-- ==== ADDRESS SUMMARY ==== -->
-                        <div class="row mb-3">
-                            <div class="col-6">
-                                <small class="text-muted d-block">From</small>
-                                @if ($quote->pickupDetail && $quote->pickupDetail->city)
-                                    <p class="mb-0 fw-semibold">
-                                        {{ $quote->pickupDetail->city }}, {{ $quote->pickupDetail->state }}
-                                    </p>
-                                    @if ($quote->pickupDetail->postal_code)
-                                        <small class="text-muted">{{ $quote->pickupDetail->postal_code }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted fst-italic">—</span>
-                                @endif
-                            </div>
-                            <div class="col-6">
-                                <small class="text-muted d-block">To</small>
-                                @if ($quote->deliveryDetail && $quote->deliveryDetail->city)
-                                    <p class="mb-0 fw-semibold">
-                                        {{ $quote->deliveryDetail->city }}, {{ $quote->deliveryDetail->state }}
-                                    </p>
-                                    @if ($quote->deliveryDetail->postal_code)
-                                        <small class="text-muted">{{ $quote->deliveryDetail->postal_code }}</small>
-                                    @endif
-                                @else
-                                    <span class="text-muted fst-italic">—</span>
-                                @endif
-                            </div>
-                        </div>
-
-                        <!-- ==== DATES ==== -->
-                        <div class="row mb-3 text-muted small">
-                            <div class="col-6">
-                                <i class="fas fa-calendar-alt me-1"></i>
-                                {{ \Carbon\Carbon::parse($quote->shipment_date)->format('M d, Y') }}
-                            </div>
-                            <div class="col-6">
-                                <i class="fas fa-clock me-1"></i>
-                                {{ $quote->created_at->format('M d, Y') }}
-                            </div>
-                        </div>
-
-                        <!-- ==== QUOTE RESULT ==== -->
-                        @if ($latestResponse && $latestResponse->status === 'success')
-                            <div class="bg-light rounded-3 p-3 mb-3">
-                                <div class="d-flex justify-content-between align-items-center mb-2">
-                                    <span class="fw-semibold text-dark">Best Price</span>
-                                    <span class="h4 text-success mb-0 fw-bold">
-                                        ${{ number_format($lowestPrice, 2) }}
-                                    </span>
-                                </div>
-                                <div class="d-flex justify-content-between small text-muted">
-                                    <span>Carrier Options</span>
-                                    <span class="fw-semibold">{{ $carrierCount }} carrier{{ $carrierCount != 1 ? 's' : '' }}</span>
-                                </div>
-                            </div>
-                        @elseif ($latestResponse && $latestResponse->status === 'failed')
-                            <div class="alert alert-danger p-2 mb-0 small">
-                                <i class="fas fa-exclamation-triangle me-1"></i>
-                                Quote generation failed
-                            </div>
-                        @else
-                            <div class="alert alert-warning p-2 mb-0 small">
-                                <i class="fas fa-clock me-1"></i>
-                                Quote in progress…
-                            </div>
-                        @endif
-                    </div>
-
-                    <!-- Footer – CTA -->
-                    <div class="card-footer bg-transparent border-0 pt-0">
-                        @if ($latestResponse && $latestResponse->status === 'success')
-                        @php
-                        $quote_id = encrypt($quote->id);
-                        @endphp
-                            <a href="{{ route('quotes.show',$quote_id) }}"
-                               class="btn btn-success w-100 d-flex align-items-center justify-content-center">
-                                <i class="fas fa-credit-card me-2"></i> Book Now
-                            </a>
-                        @endif
-                    </div>
-                </div>
-                <!-- ==== END CARD ==== -->
+        <div class="card shadow-sm mt-4">
+            <div class="card-body p-0">
+                <table id="quotesTable" class="table table-hover mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Booking ID</th>
+                            <th>Warehouse Name</th>
+                            <th>Storage</th>
+                            <th>Total Space</th>
+                            <th>Booking Period</th>
+                            <th>Total Amount</th>
+                            <th>Booking Status</th>
+                            <th>Payment Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
-        @endforeach
+        </div>
     </div>
 @else
     <!-- Empty State -->
@@ -173,7 +60,8 @@
                 </div>
             </div>
         </div>
-        <p>Your Quote details have been submitted for review. Our team will verify the information and update the status shortly.</p>
+        <p id="popupMessage">Your Quote details have been submitted for review. Our team will verify the information and update the status shortly.</p>
+        <div class="spinner-border text-primary" id="popupSpinner" role="status"></div>
     </div>
 </div>
 
@@ -191,7 +79,6 @@
         <div class="form-section">
             <form id="quoteForm">
                 @csrf
-                <input type="hidden" name="quote_id" id="quote_id">
 
                 <!-- Step 1: quote Information -->
                 <div class="ark__steps-wrap wizard-step active" data-step="1">
@@ -280,14 +167,14 @@
                         <div class="form-fields" id="step2-fields">
                             <div class="form-group">
                                 <label for="pickup_city">City <span class="required">*</span></label>
-                                <input type="text" id="pickup_city" name="city" required placeholder="Enter pickup city" value="Holbrook" />
+                                <input type="text" id="pickup_city" name="pickup_city" required placeholder="Enter pickup city" value="Holbrook" />
                                 <span tooltip="Please enter a city" class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
                             </div>
                             <div class="form-group">
                                 <label for="pickup_state">State <span class="required">*</span></label>
-                                <select id="pickup_state" name="state" class="js-states form-control" required>
+                                <select id="pickup_state" name="pickup_state" class="js-states form-control" required>
                                     <option value="">Select State</option>
                                     <option value="NY" selected>New York</option>
                                     <!-- Other states -->
@@ -347,14 +234,14 @@
                             </div>
                             <div class="form-group">
                                 <label for="pickup_postal_code">Postal Code <span class="required">*</span></label>
-                                <input type="text" id="pickup_postal_code" name="postal_code" required placeholder="Enter pickup postal code" value="11741" />
+                                <input type="text" id="pickup_postal_code" name="pickup_postal_code" required placeholder="Enter pickup postal code" value="11741" />
                                 <span tooltip="Please enter a valid postal code" class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
                             </div>
                             <div class="form-group">
                                 <label for="pickup_country">Country <span class="required">*</span></label>
-                                <select id="pickup_country" name="country" required class="js-states form-control">
+                                <select id="pickup_country" name="pickup_country" required class="js-states form-control">
                                     <option value="">Select Country</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->code }}" {{ $country->code == 'USA' ? 'selected' : '' }}>{{ $country->name }}</option>
@@ -366,18 +253,18 @@
                             </div>
                             <div class="form-group">
                                 <label for="pickup_address_1">Address Line 1 <span class="required">*</span></label>
-                                <input type="text" maxlength="50" id="pickup_address_1" name="address_1" required placeholder="Enter address line 1" />
+                                <input type="text" maxlength="50" id="pickup_address_1" name="pickup_address_1" required placeholder="Enter address line 1" />
                                 <span class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
                             </div>
                             <div class="form-group">
                                 <label for="pickup_address_2">Address Line 2</label>
-                                <input type="text" maxlength="50" id="pickup_address_2" name="address_2" placeholder="Suite, apartment, or additional details" />
+                                <input type="text" maxlength="50" id="pickup_address_2" name="pickup_address_2" placeholder="Suite, apartment, or additional details" />
                             </div>
                             <div class="form-group">
                                 <label for="pickup_contact_number">Contact Phone <span class="required">*</span></label>
-                                <input type="tel" id="pickup_contact_number" name="contact_number" maxlength="10" pattern="[0-9]{10}" required placeholder="Enter 10-digit phone number" />
+                                <input type="tel" id="pickup_contact_number" name="pickup_contact_number" maxlength="10" pattern="[0-9]{10}" required placeholder="Enter 10-digit phone number" />
                                 <span class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
@@ -406,14 +293,14 @@
                         <div class="form-fields" id="step3-fields">
                             <div class="form-group">
                                 <label for="delivery_city">City <span class="required">*</span></label>
-                                <input type="text" id="delivery_city" name="city" required placeholder="Enter delivery city" value="Cincinnati" />
+                                <input type="text" id="delivery_city" name="delivery_city" required placeholder="Enter delivery city" value="Cincinnati" />
                                 <span class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
                             </div>
                             <div class="form-group">
                                 <label for="delivery_state">State <span class="required">*</span></label>
-                                <select id="delivery_state" name="state" class="js-states form-control" required>
+                                <select id="delivery_state" name="delivery_state" class="js-states form-control" required>
                                     <option value="">Select State</option>
                                     <option value="OH" selected>Ohio</option>
                                     <!-- Other states -->
@@ -473,12 +360,12 @@
                             </div>
                             <div class="form-group">
                                 <label for="delivery_postal_code">Postal Code <span class="required">*</span></label>
-                                <input type="text" id="delivery_postal_code" name="postal_code" required placeholder="Enter delivery postal code" value="45203" />
+                                <input type="text" id="delivery_postal_code" name="delivery_postal_code" required placeholder="Enter delivery postal code" value="45203" />
                                 <span class="error-message">Please enter a valid postal code.</span>
                             </div>
                             <div class="form-group">
                                 <label for="delivery_country">Country <span class="required">*</span></label>
-                                <select id="delivery_country" name="country" required class="js-states form-control">
+                                <select id="delivery_country" name="delivery_country" required class="js-states form-control">
                                     <option value="">Select Country</option>
                                     @foreach($countries as $country)
                                         <option value="{{ $country->code }}" {{ $country->code == 'USA' ? 'selected' : '' }}>{{ $country->name }}</option>
@@ -490,14 +377,14 @@
                             </div>
                             <div class="form-group">
                                 <label for="delivery_address_1">Address Line 1 <span class="required">*</span></label>
-                                <input type="text" maxlength="50" id="delivery_address_1" name="address_1" required placeholder="Enter delivery address" />
+                                <input type="text" maxlength="50" id="delivery_address_1" name="delivery_address_1" required placeholder="Enter delivery address" />
                                 <span class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
                             </div>
                             <div class="form-group">
                                 <label for="delivery_address_2">Address Line 2</label>
-                                <input type="text" maxlength="50" id="delivery_address_2" name="address_2" placeholder="Suite, apartment, or additional details" />
+                                <input type="text" maxlength="50" id="delivery_address_2" name="delivery_address_2" placeholder="Suite, apartment, or additional details" />
                                 <span class="error-message">
                                     <img src="{{ asset('assets/images/input-error.svg') }}" alt="">
                                 </span>
@@ -626,220 +513,570 @@
 </div>
 @endsection
 
-
 @push('scripts')
 <script>
-    $(document).ready(function () {
-        // Initialize Tippy for tooltips
-        tippy('[tooltip]', {
-            arrow: true,
-            placement: 'top',
-            delay: 5,
-            distance: 15,
-            maxWidth: 300,
-            followCursor: true,
-            allowHTML: true,
-            theme: 'custom',
-            ignoreAttributes: true,
-            content(reference) {
-                const tooltip = reference.getAttribute('tooltip');
-                reference.removeAttribute('tooltip');
-                return tooltip;
+document.addEventListener('DOMContentLoaded', function () {
+    $('#quotesTable').DataTable({
+        data: @json($carrierData),
+        pageLength: 10,
+        lengthMenu: [10, 25, 50],
+        responsive: true,
+        order: [[3, 'asc']],
+        language: {
+            search: "Search quotes:",
+            info: "Showing _START_ to _END_ of _TOTAL_ rates",
+            paginate: { previous: "Prev", next: "Next" }
+        },
+        columns: [
+            {
+                data: null,
+                title: "Freight Quote",
+                render: (data) => `${data.booking_id || '—'}`
             },
-        });
-
+            {
+                data: 'warehouse',
+                title: "Carrier"
+            },
+            {
+                data: 'storage',
+                title: "Service Level"
+            },
+            {
+                data: 'total_amount',
+                title: "Base Rate ($)",
+                render: (data) => '$' + parseFloat(data).toFixed(2)
+            },
+            {
+                data: 'total_amount',
+                title: "Final Rate ($)",
+                render: (data) => '<strong>$' + parseFloat(data).toFixed(2) + '</strong>'
+            },
+            {
+                data: 'total_space',
+                title: "Estimated Delivery"
+            },
+            {
+                data: 'booking_status',
+                title: "Status",
+                render: () => '<span class="badge bg-warning text-dark">Pending</span>'
+            },
+            {
+                data: 'payment_status',
+                title: "Payment Status",
+                render: () => '<span class="badge bg-secondary">Proceed To Payment</span>'
+            },
+            {
+                data: null,
+                title: "Tracking",
+                orderable: false,
+                render: (row) => `
+                    <button class="btn btn-sm btn-outline-primary tracking-btn" 
+                            data-id="${row.quote_id}">
+                        View
+                    </button>
+                `
+            }
+        ]
+    });
+});
+</script>
+<script>
+    // Fixed and optimized script for quote form
+    document.addEventListener('DOMContentLoaded', function () {
         let currentStep = 1;
         const totalSteps = 4;
 
-        // Open Drawer
-        $('#openDrawerBtn').on('click', function () {
-            $('#sideDrawer, #drawerOverlay').fadeIn(300);
-            currentStep = 1;
-            updateStep();
-            // Set default quote date to tomorrow
-            const tomorrow = new Date();
-            tomorrow.setDate(tomorrow.getDate() + 1);
-            $('#shipment_date').val(tomorrow.toISOString().split('T')[0]);
-        });
+        // Get ALL elements safely
+        const drawer = document.getElementById('sideDrawer');
+        const overlay = document.getElementById('drawerOverlay');
+        const successPopup = document.getElementById('successPopup');
+        const nextBtn = document.getElementById('nextBtn');
+        const backBtn = document.getElementById('backBtn');
+        const nextText = nextBtn ? nextBtn.querySelector('p') : null;
+        const nextSpinner = document.getElementById('nextSpinner');
+        const popupMessage = document.getElementById('popupMessage');
+        const popupSpinner = document.getElementById('popupSpinner');
 
-        // Close Drawer
-        $('#closeDrawerBtn, #drawerOverlay, #closePopup').on('click', function () {
-            $('#sideDrawer, #drawerOverlay, #successPopup').fadeOut(300);
-        });
-
-        // Prevent closing when clicking inside drawer
-        $('#sideDrawer').on('click', function (e) {
-            e.stopPropagation();
-        });
-
-        // Next Button
-        $('#nextBtn').on('click', function () {
-            if (validateStep(currentStep)) {
-                saveStep(currentStep);
-            }
-        });
-
-        // Back Button
-        $('#backBtn').on('click', function () {
-            if (currentStep > 1) {
-                currentStep--;
+        // ============================================
+        // OPEN/CLOSE DRAWER
+        // ============================================
+        const openBtn = document.getElementById('openDrawerBtn');
+        if (openBtn) {
+            openBtn.addEventListener('click', () => {
+                drawer.style.display = 'block';
+                overlay.style.display = 'block';
+                document.body.style.overflow = 'hidden';
+                currentStep = 1;
                 updateStep();
-            }
-        });
-
-        // Update Step UI
-        function updateStep() {
-            $('.wizard-step').removeClass('active');
-            $(`.wizard-step[data-step="${currentStep}"]`).addClass('active');
-
-            $('.form-fields').removeClass('active');
-            $(`#step${currentStep}-fields`).addClass('active');
-
-            $('#backBtn').prop('disabled', currentStep === 1);
-            $('#nextBtn p').text(currentStep === totalSteps ? 'Submit' : 'Next');
-
-            // Update progress indicators
-            $('.step-number').removeClass('active completed');
-            for (let i = 1; i <= totalSteps; i++) {
-                const $step = $(`.wizard-step[data-step="${i}"] .step-number`);
-                if (i < currentStep) $step.addClass('completed');
-                if (i === currentStep) $step.addClass('active');
-            }
+                // setTomorrowDate();
+                clearErrors();
+            });
         }
 
-        // Validate current step
+        // Close everything
+        document.querySelectorAll('#closeDrawerBtn, #drawerOverlay, #closePopup').forEach(el => {
+            if (el) {
+                el.addEventListener('click', () => {
+                    drawer.style.display = 'none';
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                    if (successPopup) successPopup.style.display = 'none';
+                });
+            }
+        });
+
+        // Prevent drawer close on drawer click
+        if (drawer) {
+            drawer.addEventListener('click', e => e.stopPropagation());
+        }
+
+        // Close on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape' && drawer && drawer.style.display === 'block') {
+                drawer.style.display = 'none';
+                overlay.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        });
+
+        // ============================================
+        // NAVIGATION BUTTONS
+        // ============================================
+        if (nextBtn) {
+            nextBtn.addEventListener('click', () => {
+                if (validateStep(currentStep)) {
+                    if (currentStep < totalSteps) {
+                        currentStep++;
+                        updateStep();
+                    } else {
+                        submitQuote();
+                    }
+                }
+            });
+        }
+
+        if (backBtn) {
+            backBtn.addEventListener('click', () => {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateStep();
+                }
+            });
+        }
+
+        // ============================================
+        // DATE PICKER - SET TOMORROW AS DEFAULT
+        // ============================================
+        // function setTomorrowDate() {
+        //     const shipmentDate = document.getElementById('shipment_date');
+        //     const dateDisplay = document.getElementById('dateDisplay');
+        //     if (shipmentDate && dateDisplay) {
+        //         const tomorrow = new Date();
+        //         tomorrow.setDate(tomorrow.getDate() + 1);
+        //         const tomorrowStr = tomorrow.toISOString().split('T')[0];
+        //         shipmentDate.value = tomorrowStr;
+        //         dateDisplay.textContent = tomorrow.toLocaleDateString('en-US', {
+        //             month: '2-digit',
+        //             day: '2-digit',
+        //             year: 'numeric'
+        //         });
+        //         dateDisplay.classList.remove('placeholder');
+        //     }
+        // }
+
+        // ============================================
+        // UPDATE STEP DISPLAY
+        // ============================================
+        function updateStep() {
+            // Hide all steps
+            document.querySelectorAll('.wizard-step').forEach(step => {
+                step.classList.remove('active', 'completed');
+            });
+            document.querySelectorAll('.form-fields').forEach(field => {
+                field.classList.remove('active');
+            });
+
+            // Show current and completed steps
+            document.querySelectorAll('.wizard-step').forEach((step, index) => {
+                const stepNum = index + 1;
+                if (stepNum < currentStep) {
+                    step.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    step.classList.add('active');
+                }
+            });
+
+            // Show current fields
+            const currentStepEl = document.querySelector(`.wizard-step[data-step="${currentStep}"]`);
+            const currentFieldEl = document.getElementById(`step${currentStep}-fields`);
+            if (currentStepEl) currentStepEl.classList.add('active');
+            if (currentFieldEl) currentFieldEl.classList.add('active');
+
+            // Update buttons
+            if (backBtn) backBtn.disabled = currentStep === 1;
+            
+            // Update next button text and appearance
+            if (nextText) {
+                if (currentStep === totalSteps) {
+                    nextText.textContent = 'Submit';
+                    nextBtn.classList.add('submit-mode');
+                } else {
+                    nextText.textContent = 'Next';
+                    nextBtn.classList.remove('submit-mode');
+                }
+            }
+
+            // Update step number icons
+            document.querySelectorAll('.step-number').forEach((el, index) => {
+                const stepNum = index + 1;
+                el.classList.remove('completed', 'active');
+                if (stepNum < currentStep) {
+                    el.classList.add('completed');
+                } else if (stepNum === currentStep) {
+                    el.classList.add('active');
+                }
+            });
+
+            clearErrors();
+        }
+
+        // ============================================
+        // CLEAR ERROR MESSAGES
+        // ============================================
+        function clearErrors() {
+            document.querySelectorAll('.form-group').forEach(group => {
+                group.classList.remove('error');
+            });
+            document.querySelectorAll('.error-message').forEach(error => {
+                error.classList.remove('show');
+            });
+        }
+
+        // ============================================
+        // VALIDATE STEP - SKIP OPTIONAL ADDRESS LINE 2
+        // ============================================
         function validateStep(step) {
             let isValid = true;
-            const $fields = $(`#step${step}-fields .form-group`);
+            const groups = document.querySelectorAll(`#step${step}-fields .form-group`);
 
-            $fields.each(function () {
-                const $input = $(this).find('input, select').first();
-                const value = $input.val()?.trim();
-                const isRequired = $input.prop('required');
+            groups.forEach(group => {
+                const inputs = group.querySelectorAll('input, select, textarea');
+                if (!inputs.length) return;
 
-                if (isRequired && !value) {
-                    showError($(this));
-                    isValid = false;
+                // Clear previous errors
+                group.classList.remove('error');
+                const errorElem = group.querySelector('.error-message');
+                if (errorElem) errorElem.classList.remove('show');
+
+                // Check if any input in this group is required
+                const hasRequiredInput = [...inputs].some(i => i.required);
+                if (!hasRequiredInput) return; // Skip optional fields
+
+                // For radio/checkbox groups
+                if (inputs.length > 1 && (inputs[0].type === 'checkbox' || inputs[0].type === 'radio')) {
+                    const isChecked = [...inputs].some(i => i.checked);
+                    if (!isChecked && hasRequiredInput) {
+                        group.classList.add('error');
+                        if (errorElem) errorElem.classList.add('show');
+                        isValid = false;
+                    }
                 } else {
-                    hideError($(this));
+                    // For regular inputs
+                    const hasValue = [...inputs].some(i => {
+                        const value = (i.value || '').trim();
+                        return value.length > 0;
+                    });
+                    
+                    if (!hasValue && hasRequiredInput) {
+                        group.classList.add('error');
+                        if (errorElem) errorElem.classList.add('show');
+                        isValid = false;
+                    }
                 }
             });
 
             return isValid;
         }
 
-        // Show/Hide error
-        function showError($group) {
-            $group.find('.error-message').addClass('show');
-        }
-        function hideError($group) {
-            $group.find('.error-message').removeClass('show');
+        // ============================================
+        // SHOW/HIDE LOADING SPINNER
+        // ============================================
+        function showLoading(show = true) {
+            if (nextSpinner) {
+                nextSpinner.classList.toggle('d-none', !show);
+            }
+            if (nextBtn) {
+                nextBtn.disabled = show;
+                if (show) {
+                    nextBtn.style.opacity = '0.7';
+                    nextBtn.style.cursor = 'not-allowed';
+                } else {
+                    nextBtn.style.opacity = '1';
+                    nextBtn.style.cursor = 'pointer';
+                }
+            }
         }
 
-        // Save Step via AJAX
-        function saveStep(step) {
-            const formData = new FormData($('#quoteForm')[0]);
-            let url = '';
-
-            switch (step) {
-                case 1:
-                    url = '{{ route("quotes.store.step1") }}';
+        // ============================================
+        // SUBMIT QUOTE FORM
+        // ============================================
+        function submitQuote() {
+            // Final validation for ALL steps
+            let allValid = true;
+            for (let step = 1; step <= totalSteps; step++) {
+                if (!validateStep(step)) {
+                    allValid = false;
+                    if (step !== currentStep) {
+                        currentStep = step;
+                        updateStep();
+                    }
                     break;
-                case 2:
-                    url = '{{ route("quotes.store.step2") }}';
-                    formData.append('quote_id', $('#quote_id').val());
-                    break;
-                case 3:
-                    url = '{{ route("quotes.store.step3") }}';
-                    formData.append('quote_id', $('#quote_id').val());
-                    break;
-                case 4:
-                    url = '{{ route("quotes.store.step4") }}';
-                    formData.append('quote_id', $('#quote_id').val());
-                    $('#nextSpinner').removeClass('d-none');
-                    $('#nextBtn').prop('disabled', true);
-                    break;
+                }
             }
 
-            $.ajax({
-                url: url,
+            if (!allValid) {
+                alert('Please fill all required fields before submitting.');
+                return;
+            }
+
+            const form = document.getElementById('quoteForm');
+            if (!form) return;
+
+            const formData = new FormData(form);
+
+            // Handle additional_services - remove duplicates
+            const checkboxes = document.querySelectorAll('input[name="additional_services[]"]:checked');
+            const uniqueServices = [...new Set([...checkboxes].map(cb => cb.value))];
+            formData.delete('additional_services[]');
+            uniqueServices.forEach(service => {
+                formData.append('additional_services[]', service);
+            });
+
+            showLoading(true);
+
+            fetch(form.action || '/quotes/store', {
                 method: 'POST',
-                data: formData,
-                processData: false,
-                contentType: false,
+                body: formData,
                 headers: {
-                    'X-Requested-With': 'XMLHttpRequest'
-                },
-                success: function (data) {
-                    if (data.success) {
-                        if (step === 1 && data.quote_id) {
-                            $('#quote_id').val(data.quote_id);
-                        }
+                    'X-Requested-With': 'XMLHttpRequest',
+                    'Accept': 'application/json',
+                }
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    // Hide drawer
+                    drawer.style.display = 'none';
+                    overlay.style.display = 'none';
+                    document.body.style.overflow = '';
+                    
+                    // Show success popup
+                    if (successPopup && popupMessage) {
+                        popupMessage.textContent = 'Quote Created Successfully!';
+                        if (popupSpinner) popupSpinner.style.display = 'none';
+                        successPopup.style.display = 'flex';
+                    }
 
-                        if (step === totalSteps) {
-                            $('#nextSpinner').addClass('d-none');
-                            $('#nextBtn').prop('disabled', false);
-                            $('#sideDrawer, #drawerOverlay').fadeOut(300);
-                            $('#successPopup').fadeIn(300);
-                            // Optionally reload quotes list
-                            setTimeout(() => location.reload(), 2000);
+                    // Redirect after 2 seconds
+                    setTimeout(() => {
+                        if (data.redirect) {
+                            window.location.href = data.redirect;
                         } else {
-                            currentStep = data.next_step || currentStep + 1;
-                            updateStep();
+                            window.location.reload();
                         }
-                    } else {
-                        alert(data.message || 'Validation failed. Please check your inputs.');
-                        if (step === totalSteps) {
-                            $('#nextSpinner').addClass('d-none');
-                            $('#nextBtn').prop('disabled', false);
-                        }
-                    }
-                },
-                error: function () {
-                    // alert('An error occurred. Please try again.');
-                    if (step === totalSteps) {
-                        $('#nextSpinner').addClass('d-none');
-                        $('#nextBtn').prop('disabled', false);
-                    }
+                    }, 2000);
+                } else {
+                    throw new Error(data.message || 'Unknown error occurred');
+                }
+            })
+            .catch(error => {
+                console.error('Quote submission error:', error);
+                alert(`Error: ${error.message}`);
+            })
+            .finally(() => {
+                showLoading(false);
+            });
+        }
+
+        // ============================================
+        // CUSTOM DATE PICKER
+        // ============================================
+        const dateInputContainer = document.getElementById('dateInputContainer');
+        const calendarPopup = document.getElementById('calendarPopup');
+        const shipmentDate = document.getElementById('shipment_date');
+        const dateDisplay = document.getElementById('dateDisplay');
+        const calendarGrid = document.getElementById('calendarGrid');
+        const calendarTitle = document.getElementById('calendarTitle');
+        const prevMonthBtn = document.getElementById('prevMonth');
+        const nextMonthBtn = document.getElementById('nextMonth');
+
+        let currentCalendarDate = new Date();
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+            'July', 'August', 'September', 'October', 'November', 'December'];
+
+        function renderCalendar() {
+            if (!calendarGrid) return;
+            
+            const year = currentCalendarDate.getFullYear();
+            const month = currentCalendarDate.getMonth();
+
+            calendarTitle.textContent = `${monthNames[month]} ${year}`;
+
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+            calendarGrid.innerHTML = '';
+
+            // Day headers
+            const dayHeaders = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+            dayHeaders.forEach(day => {
+                const header = document.createElement('div');
+                header.className = 'calendar-day-header';
+                header.textContent = day;
+                calendarGrid.appendChild(header);
+            });
+
+            // Previous month days
+            for (let i = firstDay - 1; i >= 0; i--) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day disabled';
+                day.textContent = daysInPrevMonth - i;
+                calendarGrid.appendChild(day);
+            }
+
+            // Current month days
+            const today = new Date();
+            const selectedDateValue = shipmentDate.value;
+            
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day';
+                day.textContent = i;
+
+                const dayDate = new Date(year, month, i);
+                const dayDateStr = dayDate.toISOString().split('T')[0];
+
+                // Mark today
+                if (dayDate.toDateString() === today.toDateString()) {
+                    day.classList.add('today');
+                }
+
+                // Mark selected
+                if (selectedDateValue === dayDateStr) {
+                    day.classList.add('selected');
+                }
+
+                // Disable past dates
+                if (dayDate < today.setHours(0, 0, 0, 0)) {
+                    day.classList.add('disabled');
+                } else {
+                    day.addEventListener('click', () => selectDate(dayDate));
+                }
+
+                calendarGrid.appendChild(day);
+            }
+
+            // Next month days
+            const remainingDays = 42 - (firstDay + daysInMonth);
+            for (let i = 1; i <= remainingDays; i++) {
+                const day = document.createElement('div');
+                day.className = 'calendar-day disabled';
+                day.textContent = i;
+                calendarGrid.appendChild(day);
+            }
+        }
+
+        function selectDate(date) {
+            const isoDate = date.toISOString().split('T')[0];
+            shipmentDate.value = isoDate;
+            dateDisplay.textContent = date.toLocaleDateString('en-US', {
+                month: '2-digit',
+                day: '2-digit',
+                year: 'numeric'
+            });
+            dateDisplay.classList.remove('placeholder');
+
+            // Remove error state
+            const formGroup = dateInputContainer.closest('.form-group');
+            if (formGroup) formGroup.classList.remove('error');
+
+            // Close calendar
+            calendarPopup.style.display = 'none';
+            dateInputContainer.classList.remove('focused');
+        }
+
+        // Toggle calendar
+        if (dateInputContainer) {
+            dateInputContainer.addEventListener('click', (e) => {
+                e.stopPropagation();
+                const isVisible = calendarPopup.style.display === 'block';
+                
+                if (isVisible) {
+                    calendarPopup.style.display = 'none';
+                    dateInputContainer.classList.remove('focused');
+                } else {
+                    calendarPopup.style.display = 'block';
+                    dateInputContainer.classList.add('focused');
+                    renderCalendar();
                 }
             });
         }
 
-        // Initialize Select2 (if using)
-        if (typeof $.fn.select2 !== 'undefined') {
-            $('.js-states').select2({
-                placeholder: function () {
-                    return $(this).data('placeholder') || 'Select an option';
-                }
+        // Navigate months
+        if (prevMonthBtn) {
+            prevMonthBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() - 1);
+                renderCalendar();
             });
         }
 
-        // Calendar Logic (Basic)
-        const $dateInput = $('#dateInputContainer');
-        const $calendar = $('#calendarPopup');
-        const $dateDisplay = $('#dateDisplay');
-        const $shipmentDate = $('#shipment_date');
-
-        $dateInput.on('click', function () {
-            $calendar.toggle();
-        });
+        if (nextMonthBtn) {
+            nextMonthBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                currentCalendarDate.setMonth(currentCalendarDate.getMonth() + 1);
+                renderCalendar();
+            });
+        }
 
         // Close calendar when clicking outside
-        $(document).on('click', function (e) {
-            if (!$(e.target).closest('.date-picker-wrapper').length) {
-                $calendar.hide();
+        document.addEventListener('click', (e) => {
+            if (calendarPopup && !calendarPopup.contains(e.target) && 
+                !dateInputContainer.contains(e.target)) {
+                calendarPopup.style.display = 'none';
+                if (dateInputContainer) dateInputContainer.classList.remove('focused');
             }
         });
 
-        // Update display when date changes
-        $shipmentDate.on('change', function () {
-            const val = $(this).val();
-            if (val) {
-                const date = new Date(val);
-                $dateDisplay.text(date.toLocaleDateString('en-US'));
-                $dateDisplay.removeClass('placeholder');
-            }
+        // ============================================
+        // REMOVE ERROR ON INPUT
+        // ============================================
+        document.querySelectorAll('input, select, textarea').forEach(field => {
+            field.addEventListener('input', () => {
+                const formGroup = field.closest('.form-group');
+                if (formGroup && field.value.trim()) {
+                    formGroup.classList.remove('error');
+                    const errorElem = formGroup.querySelector('.error-message');
+                    if (errorElem) errorElem.classList.remove('show');
+                }
+            });
         });
+
+        // ============================================
+        // INITIALIZE SELECT2 IF AVAILABLE
+        // ============================================
+        if (typeof $ !== 'undefined' && $.fn.select2) {
+            $('.js-states').select2({
+                placeholder: 'Select an option',
+                width: '100%'
+            });
+        }
     });
 </script>
 @endpush

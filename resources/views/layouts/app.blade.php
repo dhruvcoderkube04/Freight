@@ -15,7 +15,8 @@
     <link rel="stylesheet" href="{{ asset('assets/css/header.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/common.css') }}">
     <link rel="stylesheet" href="{{ asset('assets/css/dashboard.css') }}">
-    {{-- <link rel="stylesheet" href="{{ asset('assets/css/custom.css') }}"> --}}
+    {{-- datatable --}}
+    <link rel="stylesheet" href="https://cdn.datatables.net/2.3.4/css/dataTables.dataTables.css" />
     
     @stack('styles')
 </head>
@@ -36,6 +37,9 @@
     <script src="https://unpkg.com/tippy.js@5"></script>
     
     <script src="{{ asset('assets/js/script.js') }}"></script>
+
+    {{-- datatable --}}
+    <script src="https://cdn.datatables.net/2.3.4/js/dataTables.js"></script>
     
     @stack('scripts')
 </body>
