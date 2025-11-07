@@ -244,7 +244,7 @@ class QuoteController extends Controller
 
     public function showPaymentForm(Request $request, $id)
     {
-        $id = decrypt($id);
+        // $id = decrypt($id);
         $quote = Quote::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
