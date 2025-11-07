@@ -22,8 +22,8 @@ Route::controller(AuthController::class)->group(function () {
     Route::post('/reset-password', 'reset')->name('password.update');
 
     // Social login
-    Route::get('/auth/{provider}', 'redirectToProvider')->name('social.login');
-    Route::get('/auth/{provider}/callback', 'handleProviderCallback');
+    Route::get('auth/{provider}/redirect', 'redirectToProvider')->name('social.redirect');
+    Route::get('auth/{provider}/callback', 'handleProviderCallback')->name('social.callback');
 });
 
 // Protected routes
