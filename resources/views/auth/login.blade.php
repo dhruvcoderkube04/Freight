@@ -27,13 +27,13 @@
 
                     {{-- Social Login Buttons --}}
                     <div class="ark__social-buttons ark__login-width">
-                        <a href="{{ route('social.login', 'google') }}" class="ark__social-btn ark__google">
+                        <a href="{{ route('social.redirect', ['provider' => 'google']) }}" class="ark__social-btn ark__google">
                             <div class="ark__icon-wrap">
                                 <img src="{{ asset('assets/images/GoogleIcon.svg') }}" alt="Google">
                             </div>
                             <p>Log in with Google</p>
                         </a>
-                        <a href="{{ route('social.login', 'facebook') }}" class="ark__social-btn ark__facebook">
+                        <a href="{{ route('social.redirect', ['provider' => 'facebook']) }}" class="ark__social-btn ark__facebook">
                             <div class="ark__icon-wrap">
                                 <img src="{{ asset('assets/images/Facebook.svg') }}" alt="Facebook">
                             </div>

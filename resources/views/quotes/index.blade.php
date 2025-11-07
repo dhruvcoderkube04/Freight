@@ -570,10 +570,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 title: "Tracking",
                 orderable: false,
                 render: (row) => `
-                    <button class="btn btn-sm btn-outline-primary tracking-btn" 
-                            data-id="${row.quote_id}">
-                        View
-                    </button>
+                    <a href="/quotes/${row.quote_id}/payment" 
+                       class="btn btn-sm btn-primary">
+                        Proceed to Payment
+                    </a>
                 `
             }
         ]
