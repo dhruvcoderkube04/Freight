@@ -30,7 +30,7 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware(['auth', 'session.timeout'])->group(function () {
     Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes/store', [QuoteController::class, 'storeQuote'])->name('quotes.store');
-
+ 
     Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
     Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
