@@ -11,15 +11,14 @@ use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Support\Str;
-use Laravel\Socialite\Socialite;
-
+use Laravel\Socialite\Facades\Socialite;
 
 class AuthController extends Controller
 {
     /* ---------------------- Registration ---------------------- */
     public function showRegistrationForm()
     {
-        return view('auth.register');
+        return view('auth.user.register'); // Updated view path for better separation
     }
 
     public function register(Request $request)
@@ -39,21 +38,33 @@ class AuthController extends Controller
             'email' => $request->email,
             'password' => Hash::make($request->password),
             'type' => 'email',
-            'user_type' => 'user',
+            'user_type' => 'user', // Always create as regular user
             'auto_approved' => false,
         ]);
 
-        // if ($user->auto_approved) {
-            Auth::login($user);
-            return redirect()->intended('/quotes/index');
-        // }
-        // return redirect()->route('login')->with('success', 'Registration successful! Please wait for approval.');
+        Auth::login($user);
+        // Set session flag for front-end user
+        session(['user_type' => 'frontend']);
+
+        return redirect()->intended('/quotes/index');
     }
 
     /* ---------------------- Login / Logout ---------------------- */
     public function showLoginForm()
     {
-        return view('auth.login');
+        // If already logged in as regular user, redirect to quotes
+        if (Auth::check() && Auth::user()->isUser()) {
+            return redirect()->route('quotes.index');
+        }
+
+        // If admin tries to access front-end login, redirect them to admin login
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            Auth::logout();
+            return redirect()->route('admin.login')
+                ->with('error', 'Admin users must login through the admin panel.');
+        }
+
+        return view('auth.user.login'); // Updated view path for better separation
     }
 
     public function login(Request $request)
@@ -66,6 +77,14 @@ class AuthController extends Controller
         if (Auth::attempt($credentials, $request->remember)) {
             $user = Auth::user();
 
+            // Reject admin users - they must use admin login
+            if ($user->isAdmin()) {
+                Auth::logout();
+                return back()->withErrors([
+                    'email' => 'Admin users must login through the admin panel at /admin/login',
+                ])->onlyInput('email');
+            }
+
             if ($user->type !== 'email') {
                 Auth::logout();
                 return back()->withErrors([
@@ -74,6 +93,10 @@ class AuthController extends Controller
             }
 
             $request->session()->regenerate();
+
+            // Set session flag for front-end user
+            session(['user_type' => 'frontend']);
+
             return redirect()->intended('/quotes/index');
         }
 
@@ -88,13 +111,17 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
 
+        // Clear front-end session flags
+        session()->forget('user_type');
+        session()->forget('url.intended');
+
         return redirect('/login');
     }
 
     /* ---------------------- Forgot Password ---------------------- */
     public function showForgotForm()
     {
-        return view('auth.forgot-password');
+        return view('auth.user.forgot-password'); // Updated view path
     }
 
     public function sendResetLinkEmail(Request $request)
@@ -102,6 +129,14 @@ class AuthController extends Controller
         $request->validate(['email' => 'required|email']);
 
         $user = User::where('email', $request->email)->first();
+
+        // Reject admin users
+        if ($user && $user->isAdmin()) {
+            return back()->withErrors([
+                'email' => 'Admin users must reset password through the admin panel.'
+            ]);
+        }
+
         if ($user && $user->type !== 'email') {
             return back()->withErrors([
                 'email' => 'This account uses social login. Please use Google or Facebook to login.'
@@ -118,7 +153,7 @@ class AuthController extends Controller
     /* ---------------------- Reset Password ---------------------- */
     public function showResetForm(Request $request, $token = null)
     {
-        return view('auth.reset-password', [
+        return view('auth.user.reset-password', [ // Updated view path
             'token' => $token,
             'email' => $request->email
         ]);
@@ -183,6 +218,16 @@ class AuthController extends Controller
             }
 
             Auth::login($user, true);
+
+            // Reject admin users even from social login
+            if ($user->isAdmin()) {
+                Auth::logout();
+                return redirect('/login')->with('error', 'Admin users must login through the admin panel at /admin/login');
+            }
+
+            // Set session flag for front-end user
+            session(['user_type' => 'frontend']);
+
             return redirect()->intended('/quotes/index');
         } catch (\Exception $e) {
             return redirect('/login')->with('error', 'Social login failed! Please try again.');
