@@ -42,7 +42,7 @@
 
                     <div data-kt-menu-trigger="click" class="menu-item" title="Dashboard" data-bs-toggle="tooltip"
                         data-bs-placement="right">
-                        <a class="menu-link {{ request()->is('dashboard') ? 'active' : '' }}"
+                        <a class="menu-link {{ request()->is('admin/dashboard') ? 'active' : '' }}"
                             href="{{ route('admin.dashboard') }}">
                             <span class="menu-icon">
                                 <i class="ki-duotone ki-home fs-1 text-white"></i>
@@ -100,6 +100,21 @@
                                 </a>
                             </div>
                         </div>
+                    </div>
+
+
+                    <div data-kt-menu-trigger="click" class="menu-item" title="Site Settings" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <a class="menu-link {{ request()->is('admin/settings') ? 'active' : '' }}" href="{{ route('admin.settings') }}">
+                            <span class="menu-icon">
+                                <i class="ki-duotone ki-element-7 fs-2">
+                                    <span class="path1"></span>
+                                    <span class="path2"></span>
+                                    <span class="path3"></span>
+                                    <span class="path4"></span>
+                                </i>
+                            </span>
+                            <span class="menu-title">Site Settings</span>
+                        </a>
                     </div>
 
                 </div>

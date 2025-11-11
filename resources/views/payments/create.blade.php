@@ -92,26 +92,38 @@
                         <div class="card-body">
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Carrier Charge:</span>
-                                <span>${{ number_format($selectedCarrier['customerRate'], 2) }}</span>
+                                <span>${{ number_format($baseRate, 2) }}</span>
                             </div>
+
+                            @if($markupPercent > 0)
+                                <div class="d-flex justify-content-between mb-2 text-primary">
+                                    <span>Platform Fee ({{ $markupPercent }}%):</span>
+                                    <span><strong>${{ number_format($markupAmount, 2) }}</strong></span>
+                                </div>
+                            @endif
+
                             <div class="d-flex justify-content-between mb-2">
                                 <span>Tax (0%):</span>
                                 <span>$0.00</span>
                             </div>
-                            <div class="d-flex justify-content-between mb-2">
-                                <span>Fees:</span>
-                                <span>$0.00</span>
-                            </div>
+
                             <hr>
+
                             <div class="d-flex justify-content-between fw-bold fs-5">
                                 <span>Total Amount:</span>
-                                <span class="text-success">${{ number_format($selectedCarrier['customerRate'], 2) }}</span>
+                                <span class="text-success">${{ number_format($finalTotal, 2) }}</span>
                             </div>
+
+                            @if($markupPercent > 0)
+                                <small class="text-muted d-block mt-2">
+                                    Includes {{ $markupPercent }}% platform fee
+                                </small>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Payment Form -->
-                    <form id="paymentForm" action="{{ route('quotes.payment.process', $quote->id) }}" method="POST">
+                    <form id="paymentForm" action="{{ route('quotes.payment.process', encrypt($quote->id)) }}" method="POST">
                         @csrf
                         <input type="hidden" name="selected_carrier_index" value="{{ $selectedCarrierIndex }}">
 
@@ -133,7 +145,7 @@
 
                         <!-- Action Buttons -->
                         <div class="d-flex justify-content-between align-items-center">
-                            <a href="{{ route('quotes.show', encrypt($quote->id)) }}" class="btn btn-secondary">
+                            <a href="{{ route('quotes.index') }}" class="btn btn-secondary">
                                 <i class="fas fa-arrow-left me-2"></i>Back to Quote
                             </a>
                             <button type="submit" class="btn btn-success btn-lg">

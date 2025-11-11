@@ -35,6 +35,7 @@ class Payment extends Model
         'approval_reason',
         'approved_by',
         'approved_at',
+        'markup_percent',
         // Payment amounts
         'currency',
         'amount',

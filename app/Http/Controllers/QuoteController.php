@@ -9,6 +9,7 @@ use App\Models\Quote;
 use App\Models\PickupDetail;
 use App\Models\DeliveryDetail;
 use App\Models\Commodity;
+use App\Models\SiteSetting;
 use App\Models\TQLResponse;
 use App\Models\UnitType;
 use App\Models\Payment;
@@ -32,27 +33,28 @@ class QuoteController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        $carrierData = [];
-            foreach ($quotes as $quote) {
-                $resp = $quote->tqlResponses->last();
-                if ($resp?->status === 'success') {
-                    foreach ($resp->response['content']['carrierPrices'] as $price) {
-                        $carrierData[] = [
-                            'quote_id'      => $quote->id,
-                            'booking_id'    => $price['carrierQuoteId'] ?? '—',
-                            'warehouse'     => $price['carrier'] ?? '—',
-                            'storage'       => $price['serviceLevel'] ?? 'Standard',
-                            'total_amount'  => $price['customerRate'],
-                            'total_space'   => $price['transitDays'] . ' day' . ($price['transitDays'] > 1 ? 's' : ''),
-                            'booking_status' => ucfirst($quote->status),
-                            'payment_status' => $quote->status,
-                        ];
-                    }
-                }
-            }
+        // Prepare structured data for DataTable
+        $quoteTableData = $quotes->map(function ($quote) {
+            $resp = $quote->tqlResponses->last();
+            $carriers = $resp?->status === 'success' ? ($resp->response['content']['carrierPrices'] ?? []) : [];
+            $carrierCount = count($carriers);
+            $cheapest = collect($carriers)->sortBy('customerRate')->first();
 
+            return [
+                'id' => $quote->id,
+                'encrypted_id' => encrypt($quote->id),
+                'created_at' => $quote->created_at->format('M d, Y h:i A'),
+                'origin' => $quote->pickupDetail ? $quote->pickupDetail->city . ', ' . $quote->pickupDetail->state : '—',
+                'destination' => $quote->deliveryDetail ? $quote->deliveryDetail->city . ', ' . $quote->deliveryDetail->state : '—',
+                'carrier_count' => $carrierCount,
+                'best_rate' => $cheapest ? '$' . number_format($cheapest['customerRate'], 2) : '—',
+                'status' => $resp?->status === 'success' ? 'Ready' : 'Failed',
+                'has_rates' => $carrierCount > 0,
+                'carriers_json' => htmlspecialchars(json_encode($carriers), ENT_QUOTES, 'UTF-8'), // SAFE!
+            ];
+        })->toArray();
         return view('quotes.index', compact(
-            'locationTypes', 'countries', 'unitTypes', 'freightClasses', 'quotes', 'carrierData'
+            'locationTypes', 'countries', 'unitTypes', 'freightClasses', 'quotes', 'quoteTableData'
         ));
     }
 
@@ -244,7 +246,7 @@ class QuoteController extends Controller
 
     public function showPaymentForm(Request $request, $id)
     {
-        // $id = decrypt($id);
+        $id = decrypt($id);
         $quote = Quote::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
@@ -265,21 +267,37 @@ class QuoteController extends Controller
         }
 
         $selectedCarrier = $carriers[$selectedCarrierIndex];
+        $baseRate = (float)($selectedCarrier['customerRate'] ?? 0);
 
-        return view('payments.create', compact('quote', 'latestResponse', 'selectedCarrier', 'selectedCarrierIndex'));
+        $settings = SiteSetting::first();
+        $markupPercent = (float)($settings->quote_markup ?? 0);
+        $markupAmount = $baseRate * ($markupPercent / 100);
+        $finalTotal = $baseRate + $markupAmount;
+
+        return view('payments.create', compact(
+            'quote', 'latestResponse', 'selectedCarrier', 'selectedCarrierIndex',
+            'baseRate', 'markupPercent', 'markupAmount', 'finalTotal'
+        ));
     }
 
-    public function processPayment(Request $request, $id)
+    public function processPayment(Request $request, $quote)
     {
+        $id = decrypt($quote);
+
         $quote = Quote::with(['tqlResponses'])
             ->where('user_id', Auth::id())
             ->findOrFail($id);
 
         $latestResponse = $quote->tqlResponses->last();
 
+        if (!$latestResponse || $latestResponse->status !== 'success') {
+            return redirect()->route('quotes.index')
+                ->with('error', 'Quote has no valid rates.');
+        }
+
         $validated = $request->validate([
             'selected_carrier_index' => 'required|integer',
-            'agree_terms' => 'required|accepted',
+            'agree_terms'            => 'required|accepted',
         ]);
 
         $carriers = $latestResponse->response['content']['carrierPrices'] ?? [];
@@ -291,62 +309,75 @@ class QuoteController extends Controller
 
         $selectedCarrier = $carriers[$carrierIndex];
 
-        // Extract specific carrier details
-        $carrierName = $selectedCarrier['carrier'] ?? 'Unknown Carrier';
-        $carrierScac = $selectedCarrier['scac'] ?? 'N/A';
-        $isPreferred = $selectedCarrier['isPreferred'] ?? false;
+        // Extract carrier details
+        $carrierName        = $selectedCarrier['carrier'] ?? 'Unknown Carrier';
+        $carrierScac        = $selectedCarrier['scac'] ?? null;
+        $isPreferred        = $selectedCarrier['isPreferred'] ?? false;
         $isCarrierOfTheYear = $selectedCarrier['isCarrierOfTheYear'] ?? false;
-        $customerRate = $selectedCarrier['customerRate'] ?? 0;
-        $transitDays = $selectedCarrier['transitDays'] ?? null;
-        $serviceLevel = $selectedCarrier['serviceLevelDescription'] ?? $selectedCarrier['serviceLevel'] ?? 'Standard';
-        $serviceType = $selectedCarrier['serviceType'] ?? null;
-        $maxLiabilityNew = $selectedCarrier['maxLiabilityNew'] ?? null;
-        $maxLiabilityUsed = $selectedCarrier['maxLiabilityUsed'] ?? null;
-        $priceCharges = $selectedCarrier['priceCharges'] ?? null;
+        $baseRate           = (float) ($selectedCarrier['customerRate'] ?? 0);
+        $transitDays        = $selectedCarrier['transitDays'] ?? null;
+        $serviceLevel       = $selectedCarrier['serviceLevelDescription'] 
+                            ?? $selectedCarrier['serviceLevel'] 
+                            ?? 'Standard';
+        $serviceType        = $selectedCarrier['serviceType'] ?? null;
+        $maxLiabilityNew    = $selectedCarrier['maxLiabilityNew'] ?? null;
+        $maxLiabilityUsed   = $selectedCarrier['maxLiabilityUsed'] ?? null;
+        $priceCharges       = $selectedCarrier['priceCharges'] ?? null;
 
-        // Check if payment requires admin approval
-        $requiresApproval = $customerRate > 1000; // Example: Require approval for amounts over $1000
+        $settings = SiteSetting::first();
+        $markupPercent = (float) ($settings->quote_markup ?? 0);
 
-        // Create payment record with simplified structure
+        // Calculate markup amount and final total
+        $markupAmount = $baseRate * ($markupPercent / 100);
+        $finalTotal   = $baseRate + $markupAmount;
+
+        // Approval logic (based on final total)
+        $requiresApproval = $finalTotal > 1000;
+
+        // Create Payment Record
         $payment = Payment::create([
-            'quote_id' => $quote->id,
-            'user_id' => Auth::id(),
+            'quote_id'              => $quote->id,
+            'user_id'               => Auth::id(),
 
-            // Carrier specific details
-            'carrier_name' => $carrierName,
-            'carrier_scac' => $carrierScac,
-            'is_preferred' => $isPreferred,
-            'is_carrier_of_the_year' => $isCarrierOfTheYear,
-            'customer_rate' => $customerRate,
-            'transit_days' => $transitDays,
-            'service_level' => $serviceLevel,
-            'service_type' => $serviceType,
-            'max_liability_new' => $maxLiabilityNew,
-            'max_liability_used' => $maxLiabilityUsed,
-            'price_charges' => $priceCharges ? json_encode($priceCharges) : null,
+            // Carrier Details
+            'carrier_name'          => $carrierName,
+            'carrier_scac'          => $carrierScac,
+            'is_preferred'          => $isPreferred,
+            'is_carrier_of_the_year'=> $isCarrierOfTheYear,
+            'customer_rate'         => $baseRate,
+            'transit_days'          => $transitDays,
+            'service_level'         => $serviceLevel,
+            'service_type'          => $serviceType,
+            'max_liability_new'     => $maxLiabilityNew,
+            'max_liability_used'    => $maxLiabilityUsed,
+            'price_charges'         => $priceCharges ? json_encode($priceCharges) : null,
 
-            // Payment status
-            'payment_status' => $requiresApproval ? 'requires_approval' : 'pending',
-            'requires_approval' => $requiresApproval,
+            // SINGLE MARKUP FIELD (as you wanted)
+            'markup_percent'        => $markupPercent,
 
-            // Amount details
-            'currency' => 'usd',
-            'amount' => $customerRate,
-            'tax_amount' => 0,
-            'total_amount' => $customerRate,
+            // Final Amounts
+            'amount'                => $baseRate,
+            'total_amount'          => $finalTotal,
+            'tax_amount'            => 0,
+            'currency'              => 'usd',
+
+            'payment_status'        => $requiresApproval ? 'requires_approval' : 'pending',
+            'requires_approval'     => $requiresApproval,
         ]);
 
+        // Redirect based on approval
         if ($requiresApproval) {
-            return redirect()->route('payments.status', $payment->id)
-                ->with('success', 'Your payment requires admin approval. We will notify you once it\'s approved.');
+            return redirect()->route('payments.status', encrypt($payment->id))
+                ->with('success', 'Your payment of $' . number_format($finalTotal, 2) . ' requires admin approval. We will notify you soon.');
         }
 
-        // Redirect to Stripe payment if no approval needed
+        // Go to Stripe payment
         return redirect()->route('payments.process', $payment->id);
     }
 
     public function paymentStatus($paymentId)
     {
+        $paymentId = decrypt($paymentId);
         $payment = Payment::with(['quote', 'quote.pickupDetail', 'quote.deliveryDetail'])
             ->where('user_id', Auth::id())
             ->findOrFail($paymentId);

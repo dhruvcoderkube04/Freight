@@ -40,6 +40,7 @@ return new class extends Migration
             $table->text('approval_reason')->nullable();
             $table->foreignId('approved_by')->nullable()->constrained('users');
             $table->timestamp('approved_at')->nullable();
+            $table->decimal('markup_percent', 5, 2)->default(0);
             
             // Payment details (simplified - using user info)
             $table->string('currency')->default('usd');

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\QuoteController;
@@ -34,7 +35,7 @@ Route::middleware(['auth', 'user', 'session.timeout'])->group(function () {
     Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes/store', [QuoteController::class, 'storeQuote'])->name('quotes.store');
     Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
-    Route::get('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
+    Route::post('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
     Route::get('/payments/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('payments.status');
     Route::get('/payments/{payment}/process', [PaymentController::class, 'processStripePayment'])->name('payments.process');
@@ -69,5 +70,8 @@ Route::prefix('admin')->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/quotes', [AdminController::class, 'quotes'])->name('admin.quotes');
         Route::get('/tql-responses', [AdminController::class, 'tqlResponses'])->name('admin.tql-responses');
+
+        Route::get('/settings', [SiteSettingController::class, 'index'])->name('admin.settings');
+        Route::post('/settings', [SiteSettingController::class, 'update'])->name('admin.settings.update');
     });
 });

@@ -16,33 +16,29 @@
     </div>
     
 @if ($quotes->count() > 0)
-    <div class="row g-4">
-        <div class="card shadow-sm mt-4">
-            <div class="card-body p-0">
-                <table id="quotesTable" class="table table-hover mb-0">
-                    <thead class="table-light">
-                        <tr>
-                            <th>Booking ID</th>
-                            <th>Warehouse Name</th>
-                            <th>Storage</th>
-                            <th>Total Space</th>
-                            <th>Booking Period</th>
-                            <th>Total Amount</th>
-                            <th>Booking Status</th>
-                            <th>Payment Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                </table>
-            </div>
-        </div>
+<div class="card shadow-sm mt-4">
+    <div class="card-body p-0">
+        <table id="quotesTable" class="table table-hover mb-0" style="width:100%">
+            <thead class="table-light">
+                <tr>
+                    <th>Quote ID</th>
+                    <th>Date</th>
+                    <th>Origin</th>
+                    <th>Destination</th>
+                    <th>Available Rates</th>
+                    <th>Best Rate</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+        </table>
     </div>
+</div>
 @else
-    <!-- Empty State -->
-    <div class="empty-state">
-        <h3>You haven't created any freight quote yet.</h3>
-        <p>Start by entering your shipment details to get an instant quote.</p>
-    </div>
+<div class="empty-state text-center py-5">
+    <h3>No quotes yet</h3>
+    <p>Create your first freight quote to get started.</p>
+</div>
 @endif
 </div>
 
@@ -511,70 +507,150 @@
         </div>
     </div>
 </div>
+
+
+<!-- Carrier Rates Modal -->
+<div class="modal fade" id="ratesModal" tabindex="-1">
+    <div class="modal-dialog modal-xl">
+        <div class="modal-content">
+            <div class="modal-header bg-primary text-white">
+                <h5 class="modal-title">Select Carrier Rate</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <table id="carrierRatesTable" class="table table-striped" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Carrier</th>
+                            <th>Service</th>
+                            <th>Transit Days</th>
+                            <th>Rate</th>
+                            <th>Preferred</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
 @endsection
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function () {
-    $('#quotesTable').DataTable({
-        data: @json($carrierData),
-        pageLength: 10,
-        lengthMenu: [10, 25, 50],
-        responsive: true,
+function openRatesModal(button) {
+    const encryptedId = button.getAttribute('data-quote-id');
+    const carriersJson = button.getAttribute('data-carriers');
+
+    // Safely parse JSON
+    let carriers = [];
+    try {
+        carriers = JSON.parse(carriersJson);
+    } catch (e) {
+        console.error('Invalid JSON:', carriersJson);
+        alert('Error loading carrier data');
+        return;
+    }
+
+    // Open Modal
+    const modal = new bootstrap.Modal(document.getElementById('ratesModal'));
+    const tbody = $('#carrierRatesTable tbody');
+    tbody.empty();
+
+    if (carriers.length === 0) {
+        tbody.append('<tr><td colspan="6" class="text-center text-muted">No carrier rates available</td></tr>');
+    } else {
+        carriers.forEach((c, i) => {
+            const preferredBadge = c.isPreferred 
+                ? '<span class="badge bg-warning ms-2">Preferred</span>' 
+                : '';
+            const cotyBadge = c.isCarrierOfTheYear 
+                ? '<span class="badge bg-info ms-2">Carrier of Year</span>' 
+                : '';
+
+            const row = `
+                <tr>
+                    <td>
+                        <strong>${c.carrier || 'Unknown'}</strong><br>
+                        <small class="text-muted">SCAC: ${c.scac || '—'}</small>
+                        ${preferredBadge} ${cotyBadge}
+                    </td>
+                    <td>${c.serviceLevelDescription || c.serviceLevel || 'Standard'}</td>
+                    <td>${c.transitDays ? c.transitDays + ' day' + (c.transitDays > 1 ? 's' : '') : '—'}</td>
+                    <td><strong class="text-success">$${parseFloat(c.customerRate || 0).toFixed(2)}</strong></td>
+                    <td>${c.isPreferred ? 'Yes' : 'No'}</td>
+                    <td>
+                        <form action="/quotes/${encryptedId}/payment" method="POST" style="display:inline">
+                            @csrf
+                            <input type="hidden" name="selected_carrier_index" value="${i}">
+                            <button type="submit" class="btn btn-sm btn-success">
+                                Select & Pay
+                            </button>
+                        </form>
+
+                    </td>
+                </tr>`;
+            tbody.append(row);
+        });
+    }
+
+    // Re-init DataTable
+    if ($.fn.DataTable.isDataTable('#carrierRatesTable')) {
+        $('#carrierRatesTable').DataTable().destroy();
+    }
+    $('#carrierRatesTable').DataTable({
+        paging: carriers.length > 10,
+        searching: false,
+        info: false,
+        ordering: true,
         order: [[3, 'asc']],
-        language: {
-            search: "Search quotes:",
-            info: "Showing _START_ to _END_ of _TOTAL_ rates",
-            paginate: { previous: "Prev", next: "Next" }
-        },
+        columnDefs: [{ targets: 5, orderable: false }]
+    });
+
+    modal.show();
+}
+
+// Initialize main table
+$(document).ready(function() {
+    $('#quotesTable').DataTable({
+        data: @json($quoteTableData),
+        pageLength: 10,
+        responsive: true,
+        order: [[1, 'desc']],
         columns: [
-            {
-                data: null,
-                title: "Freight Quote",
-                render: (data) => `${data.booking_id || '—'}`
+            { data: 'id', render: data => `<strong>#${data}</strong>` },
+            { data: 'created_at' },
+            { data: 'origin' },
+            { data: 'destination' },
+            { 
+                data: 'carrier_count', 
+                render: count => `<span class="badge bg-info">${count} option${count !== 1 ? 's' : ''}</span>`
             },
-            {
-                data: 'warehouse',
-                title: "Carrier"
+            { 
+                data: 'best_rate', 
+                render: rate => rate !== '—' ? `<strong class="text-success">${rate}</strong>` : rate
             },
-            {
-                data: 'storage',
-                title: "Service Level"
-            },
-            {
-                data: 'total_amount',
-                title: "Base Rate ($)",
-                render: (data) => '$' + parseFloat(data).toFixed(2)
-            },
-            {
-                data: 'total_amount',
-                title: "Final Rate ($)",
-                render: (data) => '<strong>$' + parseFloat(data).toFixed(2) + '</strong>'
-            },
-            {
-                data: 'total_space',
-                title: "Estimated Delivery"
-            },
-            {
-                data: 'booking_status',
-                title: "Status",
-                render: () => '<span class="badge bg-warning text-dark">Pending</span>'
-            },
-            {
-                data: 'payment_status',
-                title: "Payment Status",
-                render: () => '<span class="badge bg-secondary">Proceed To Payment</span>'
+            { 
+                data: 'status', 
+                render: status => status === 'Ready' 
+                    ? '<span class="badge bg-success">Ready</span>'
+                    : '<span class="badge bg-danger">Failed</span>'
             },
             {
                 data: null,
-                title: "Tracking",
                 orderable: false,
-                render: (row) => `
-                    <a href="/quotes/${row.quote_id}/payment" 
-                       class="btn btn-sm btn-primary">
-                        Proceed to Payment
-                    </a>
-                `
+                render: function(row) {
+                    if (row.has_rates) {
+                        return `<button class="btn btn-sm btn-primary"
+                                      data-quote-id="${row.encrypted_id}"
+                                      data-carriers="${row.carriers_json}"
+                                      onclick="openRatesModal(this)">
+                            View Rates
+                        </button>`;
+                    }
+                    return '<span class="text-muted">No rates</span>';
+                }
             }
         ]
     });

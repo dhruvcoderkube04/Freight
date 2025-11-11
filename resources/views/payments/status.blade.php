@@ -34,7 +34,7 @@
                                     <p><strong>Service Level:</strong> {{ $payment->service_level }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <p><strong>Amount:</strong> <span class="h5 text-success">${{ number_format($payment->customer_rate, 2) }}</span></p>
+                                    <p><strong>Amount:</strong> <span class="h5 text-success">${{ number_format($payment->total_amount, 2) }}</span></p>
                                     <p><strong>Transit Days:</strong> {{ $payment->transit_days ?? 'N/A' }}</p>
                                     @if($payment->is_preferred)
                                         <span class="badge bg-warning">Preferred Carrier</span>
