@@ -1,0 +1,683 @@
+/* ==================== CSS Variables (Your Provided) ==================== */
+:root {
+    /* ******************* colors ******************* */
+    --white-color: #ffffff;
+    --white-smoke: #F5F5F5;
+    --light-gray: #747474;
+    --black-color: #000000;
+    --secondary-green-color: #14AA3C;
+    --secondary-green-color-20: rgba(20, 170, 60, 0.2);
+    --secondary-green-color-30: rgba(20, 170, 60, 0.3);
+    --gray-color: #545454;
+    --pending-color: #F68D2B;
+    --reject-color: #E53E3E;
+    --primary-brick-red: #C04657;
+    --primary-brick-red-30: rgba(192, 70, 87, 0.3);
+    --primary-brick-red-20: rgba(192, 70, 87, 0.2);
+    --primary-brick-red-10: rgba(192, 70, 87, 0.1);
+    --border-color: #DFDFDF;
+    --blue-color: #0067F1;
+    /* ******************* Shadow ******************* */
+    --shadow-03: 0px 3.5px 5.5px 0px rgba(0, 0, 0, 0.02);
+    --shadow-02: 0px 2px 5px 0px rgba(0, 0, 0, 0.01);
+    /* ******************* Border-radius ******************* */
+    --border-radius-15: 15px;
+    --border-radius-10: 10px;
+    /* ******************* Z-index ******************* */
+    --z-index: 1;
+    --z-index-header: 100;
+    --z-index-popup: 1000;
+    /* ******************* Font-weight ******************* */
+    --font-weight-light: 300;
+    --font-weight-regular: 400;
+    --font-weight-medium: 500;
+    --font-weight-smedium: 600;
+    --font-weight-bold: 700;
+    /* ******************* Font-size ******************* */
+    --root-font-size: 16px;
+    --font-style-italic: italic;
+    /* ******************* Heading-size ******************* */
+    --h1: 4.375rem;
+    --h2: 3rem;
+    --h3: 2.5rem;
+    --h4: 1.625rem;
+    --h5: 1.25rem;
+    --h6: 1.125rem;
+    --text-24: 1.5rem;
+    --text-16: 1rem;
+    --text-14: 0.875rem;
+    /* ******************* Font-family ******************* */
+    --font-montserrat: "Montserrat", sans-serif;
+    --font-libre-baskerville: "Libre Baskerville", serif;
+}
+
+@media (min-width: 768px) {
+    :root {
+        --root-font-size: 1.3671875vw;
+        /* --root-font-size: 0.833333vw; */
+    }
+}
+
+@media (min-width: 1280px) {
+    :root {
+        --root-font-size: 0.833333vw;
+    }
+}
+
+
+@media (max-width: 768px) {
+    :root {
+        --root-font-size: 1.82292vw;
+    }
+}
+
+@media (max-width: 480px) {
+    :root {
+        --root-font-size: 12px;
+    }
+}
+
+html {
+    font-size: var(--root-font-size);
+    -webkit-text-size-adjust: 100%;
+    -webkit-font-smoothing: subpixel-antialiased;
+    -ms-text-size-adjust: 100%;
+    scroll-behavior: smooth;
+}
+
+/* ==================== Base Reset ==================== */
+*,
+*::before,
+*::after {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html {
+    font-size: var(--root-font-size);
+}
+
+body,
+button,
+p {
+    font-family: var(--font-montserrat);
+}
+
+body {
+    background: var(--white-color);
+    color: var(--gray-color);
+    line-height: 1.6;
+    background-image: url('/assets/images/login-bg.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    backdrop-filter: blur(4px);
+    background-color: rgba(0, 0, 0, 0.25);
+}
+
+/* ==================== Main Layout ==================== */
+.ark__container {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+    /*backdrop-filter: blur(4px);
+    */
+    background-color: rgba(0, 0, 0, 0.30);
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+}
+
+/* Left: Image Section */
+
+/* Right: Form Section */
+.ark__form-section {
+    flex: 1;
+    max-width: 1320px;
+    /* max-height: max-content; */
+    min-height: calc(100vh - 150px);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+}
+.ark__form-bg{
+    padding: 2.5rem;
+    border: 1px solid #DFDFDF;
+    background: var(--white-smoke);
+    box-shadow: var(--shadow-03);
+    font-family: var(--font-dm-sans);
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    border-radius: 20px;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+}
+.ark__form--wrap {
+    background-color: var(--white-color);
+    height: 100%;
+    -webkit-border-radius: 20px;
+    -moz-border-radius: 20px;
+    -ms-border-radius: 20px;
+    -o-border-radius: 20px;
+    border: 1px solid #DFDFDF;
+    padding: 20px;
+    position: relative;
+    z-index: 1;
+    overflow: hidden;
+    -webkit-border-radius: 30px;
+    -moz-border-radius: 30px;
+    -ms-border-radius: 30px;
+    -o-border-radius: 30px;
+    border-radius: 30px;
+
+}
+.ark__form--center{
+    overflow-y: auto;
+    height: 100%;
+}
+.ark__form--center::-webkit-scrollbar{
+    display: none;
+}
+.ark__form--wrap::-webkit-scrollbar{
+    display: none;
+}
+.ark__round-one {
+    position: absolute;
+    top: -80px;
+    right: -87px;
+    width: 22.4375rem;
+    height: 22.4375rem;
+    background-color: #D9D9D9;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    z-index: -1;
+}
+
+.ark__round-two{
+    position: absolute;
+    bottom: -136px;
+    left: -127px;
+    width: 22.4375rem;
+    height: 22.4375rem;
+    background-color: #D9D9D9;
+    border-radius: 50%;
+    -webkit-border-radius: 50%;
+    -moz-border-radius: 50%;
+    -ms-border-radius: 50%;
+    -o-border-radius: 50%;
+    z-index: -1;
+}
+
+.ark__login-width {
+    max-width: 600px;
+    width: 100%;
+    margin: auto;
+}
+
+/* Logo */
+.ark__logo {
+    font-size: var(--h2);
+    text-align: center;
+    font-weight: var(--font-weight-bold);
+    color: var(--primary-brick-red);
+    margin-bottom: 2.5rem;
+    line-height: 1.2;
+    font-family: var(--font-libre-baskerville);
+}
+
+.ark__logo span {
+    color: var(--black-color);
+}
+
+/* Title */
+.ark__auth-header {
+    margin-bottom: 2.5rem;
+    gap: 10px;
+    max-width: 450px;
+    width: 100%;
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+}
+
+.ark__title {
+    font-size: var(--h4);
+    font-weight: var(--font-weight-bold);
+    color: var(--black-color);
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: var(--font-libre-baskerville);
+    line-height: 1.2;
+}
+
+
+/* Subtitle */
+.ark__subtitle {
+    font-size: var(--text-16);
+    color: var(--light-gray);
+    text-align: center;
+    font-weight: var(--font-weight-medium);
+    line-height: 1.4;
+}
+
+/* ==================== Social Buttons ==================== */
+.ark__social-buttons {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.25rem;
+}
+
+.ark__icon-wrap {
+    width: 28px;
+    height: 29px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.ark__social-btn {
+    flex: 1;
+    padding: 7.5px;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-10);
+    font-size: var(--text-14);
+    font-weight: var(--font-weight-medium);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    background: var(--white-color);
+    color: var(--gray-color);
+    transition: all 0.3s ease;
+    text-decoration: none;
+}
+
+.ark__social-btn p {
+    font-size: var(--text-16);
+    font-weight: var(--font-weight-medium);
+    transition: color 0.3s ease;
+    margin-bottom: 0;
+}
+
+.ark__social-btn:hover {
+    /* background: var(--primary-brick-red-10); */
+    border-color: var(--primary-brick-red);
+    /* color: var(--secondary-green-color); */
+    transform: translateY(-3px) scale(1.03);
+    box-shadow: var(--shadow-02);
+    -webkit-transform: translateY(-3px) scale(1.03);
+    -moz-transform: translateY(-3px) scale(1.03);
+    -ms-transform: translateY(-3px) scale(1.03);
+    -o-transform: translateY(-3px) scale(1.03);
+}
+
+.ark__social-btn:hover p {
+    color: var(--primary-brick-red);
+}
+
+/* .ark__google { color: #ea4335; }
+.ark__facebook { color: #1877f2; } */
+
+/* ==================== Divider ==================== */
+.ark__divider {
+    text-align: center;
+    margin: 1.625rem 0;
+    position: relative;
+    font-size: var(--text-14);
+    color: var(--light-gray);
+}
+
+.ark__divider::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: var(--border-color);
+}
+
+.ark__divider span {
+    background: var(--white-color);
+    padding: 0 1rem;
+    position: relative;
+    z-index: 1;
+    font-size: var(--text-16);
+}
+
+/* ==================== Form Inputs ==================== */
+.ark__form-group {
+    margin-bottom: 1.25rem;
+}
+
+.ark__label {
+    display: block;
+    margin-bottom: 0.625rem;
+    font-weight: var(--font-weight-bold);
+    font-size: var(--text-16);
+    color: var(--black-color);
+    line-height: 1.2;
+    font-family: var(--font-nunito-sans);
+}
+
+.ark__input {
+    width: 100%;
+    padding: 0.65rem 1rem;
+    border: 1px solid var(--border-color);
+    border-radius: var(--border-radius-10);
+    font-size: var(--text-16);
+    font-family: var(--font-montserrat);
+    transition: border 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--white-color);
+}
+
+.ark__input:focus {
+    outline: none;
+    border-color: var(--primary-brick-red);
+    box-shadow: var(--shadow-03);
+}
+
+.ark__input::placeholder {
+    color: var(--light-gray);
+    font-size: var(--text-16);
+    font-family: var(--font-inter);
+}
+
+/* ==================== Checkbox ==================== */
+/* .ark__checkbox-group,.ark__checkbox-group label,.ark__checkbox {
+    cursor: pointer;
+    
+}
+.ark__checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 1.5rem 0;
+    font-size: var(--text-16);
+    color: var(--light-gray);
+}
+
+.ark__checkbox {
+    width: 18px;
+    height: 18px;
+    accent-color: var(--primary-brick-red);
+    margin-top: 0.15rem;
+}
+
+.ark__checkbox-group a {
+    color: var(--primary-brick-red);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+
+.ark__checkbox-group a:hover {
+    text-decoration: underline;
+} */
+.ark__checkbox-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin: 1.5rem 0;
+}
+
+.ark__forgot-password {
+    color: #3B82F6;
+    font-weight: var(--font-weight-medium);
+    font-size: var(--text-14);
+    text-decoration: none;
+    transition: all 0.3s ease;
+    -webkit-transition: all 0.3s ease;
+    -moz-transition: all 0.3s ease;
+    -ms-transition: all 0.3s ease;
+    -o-transition: all 0.3s ease;
+}
+
+.ark__forgot-password:hover {
+    text-decoration: underline;
+}
+
+/* Wrapper */
+.ark__checkbox-group {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.6rem;
+    font-size: var(--text-16);
+    color: var(--light-gray);
+    cursor: pointer;
+}
+
+/* Hide native checkbox */
+.ark__checkbox {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+}
+
+/* Label acts as checkbox container */
+.ark__checkbox+label {
+    position: relative;
+    padding-left: 28px;
+    line-height: 2;
+    cursor: pointer;
+}
+
+/* Create custom box */
+.ark__checkbox+label::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 2px;
+    width: 20px;
+    height: 20px;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    background: var(--white-color);
+    transition: all 0.3s ease;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* When checked — show image */
+.ark__checkbox:checked+label::before {
+    border-color: var(--primary-brick-red);
+    background: var(--primary-brick-red-10) url('/assets/images/check-box-arrow.svg') no-repeat center;
+    background-size: 12px;
+    animation: checkboxTickSlide 0.35s ease forwards;
+}
+
+@keyframes checkboxTickSlide {
+    0% {
+        background-position: center -8px;
+        opacity: 0;
+        transform: scale(0.8);
+    }
+
+    60% {
+        background-position: center 4px;
+        opacity: 1;
+        transform: scale(1.05);
+    }
+
+    100% {
+        background-position: center;
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Hover effect */
+.ark__checkbox+label:hover::before {
+    border-color: var(--primary-brick-red);
+}
+
+/* Links inside label */
+.ark__checkbox-group a {
+    color: var(--primary-brick-red);
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+
+.ark__checkbox-group a:hover {
+    text-decoration: underline;
+}
+
+/* ==================== Submit Button ==================== */
+
+.ark__submit-btn {
+    background: var(--primary-brick-red);
+    color: var(--white-color);
+    border: none;
+    padding: 0.813rem;
+    font-size: var(--text);
+    font-weight: var(--font-weight-smedium);
+    border-radius: var(--border-radius-10);
+    cursor: pointer;
+    font-family: var(--font-inter);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+    margin-bottom: 1.25rem;
+    width: 100%;
+    position: relative;
+    overflow: hidden;
+    -webkit-border-radius: var(--border-radius-10);
+    -moz-border-radius: var(--border-radius-10);
+    -ms-border-radius: var(--border-radius-10);
+    -o-border-radius: var(--border-radius-10);
+}
+
+/* Shine effect overlay */
+.ark__submit-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.3),
+            transparent);
+    transition: left 0.6s ease;
+}
+
+/* On hover — trigger shine sweep + lift */
+.ark__submit-btn:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(15, 138, 47, 0.3);
+    background: #C04657;
+}
+
+.ark__submit-btn:hover::before {
+    left: 100%;
+}
+
+/* Active state (when clicking) */
+.ark__submit-btn:active {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(15, 138, 47, 0.25);
+    transition: all 0.1s ease;
+}
+
+
+/* ==================== Login Link ==================== */
+.ark__login-link {
+    text-align: start;
+    font-size: var(--text-16);
+    color: var(--light-gray);
+}
+
+.ark__login-link a {
+    color: #3B82F6;
+    text-decoration: none;
+    font-weight: var(--font-weight-medium);
+}
+
+.ark__login-link a:hover {
+    text-decoration: underline;
+}
+
+/* ==================== Responsive Design ==================== */
+@media (max-width: 1024px) {
+    /* .ark__form-section {
+        padding: 4rem;
+    } */
+}
+
+@media (max-width: 992px) {
+    .ark__submit-btn {}
+
+    .ark__container {
+        flex-direction: column;
+    }
+
+    .ark__form-section {
+        max-width: 94%;
+        margin: auto;
+        width: 100%;
+        /* padding: 2rem 1.5rem; */
+    }
+}
+
+@media (max-width: 576px) {
+    .ark__social-buttons {
+        flex-direction: column;
+
+    }
+
+    .ark__social-btn {
+        padding: 4px;
+    }
+
+    .ark__form-section {
+        padding: 1rem;
+    }
+
+    .ark__icon-wrap img {
+        /* width: 1.4rem; */
+        height: 1.8rem;
+    }
+
+    .ark__logo {
+        font-size: 2.5rem;
+    }
+
+    .ark__title {
+        font-size: var(--h4);
+    }
+}
+
+@media (max-width: 480px) {
+    .ark__title::before {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .ark__logo {
+        margin-bottom: 1rem;
+    }
+
+    .ark__form-section {
+        padding: 1rem;
+        max-width: 100%;
+    }
+
+    .ark__icon-wrap img {
+        height: 1.4rem;
+    }
+
+    .ark__icon-wrap {
+        height: 26px;
+    }
+}

@@ -1,4 +1,4 @@
-@extends('auth.base')
+@extends('auth.user.base')
 
 @section('title', 'Ark Login')
 

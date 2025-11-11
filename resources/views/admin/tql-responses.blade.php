@@ -99,7 +99,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
     <script>
         $(document).ready(function() {
             $('#tqlResponsesTable').DataTable({
@@ -117,4 +117,4 @@
             });
         });
     </script>
-@endpush
+@endsection

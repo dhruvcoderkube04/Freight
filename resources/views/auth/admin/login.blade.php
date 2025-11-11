@@ -1,4 +1,4 @@
-@extends('auth.base')
+@extends('auth.admin.base')
 
 @section('title', 'Admin Login')
 
@@ -55,6 +55,7 @@
                                     <input type="checkbox" name="remember" id="remember" class="ark__checkbox">
                                     <label for="remember">Remember Me</label>
                                 </div>
+                                <a href="{{ route('admin.password.request') }}" class="ark__forgot-password">Forgot Password?</a>
                             </div>
 
                             <button type="submit" class="ark__submit-btn"

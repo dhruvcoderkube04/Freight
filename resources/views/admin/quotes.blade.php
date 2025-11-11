@@ -74,7 +74,7 @@
     </div>
 @endsection
 
-@push('scripts')
+@section('scripts')
     <script>
         $(document).ready(function() {
             $('#quotesTable').DataTable({
@@ -92,4 +92,4 @@
             });
         });
     </script>
-@endpush
+@endsection

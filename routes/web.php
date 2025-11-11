@@ -52,12 +52,19 @@ Route::prefix('admin')->group(function () {
         : redirect()->route('admin.login')
     );
 
+    // Forgot Password
+    Route::get('/forgot-password', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
+    Route::post('/forgot-password', [AdminAuthController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+
+    // Reset Password
+    Route::get('/reset-password/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
+    Route::post('/reset-password', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
+
     // Admin Login/Logout (Public) – Using AdminAuthController
     Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
     Route::post('/login', [AdminAuthController::class, 'login']);
     Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-
-    // All Protected Admin Pages – Using AdminController (one file only)
+    
     Route::middleware(['auth', 'admin', 'session.timeout'])->group(function () {
         Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
         Route::get('/quotes', [AdminController::class, 'quotes'])->name('admin.quotes');
