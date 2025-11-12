@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\PaymentRequestController;
 use App\Http\Controllers\Admin\SiteSettingController;
 use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
@@ -35,8 +36,12 @@ Route::controller(AuthController::class)->group(function () {
 Route::middleware(['auth', 'user', 'session.timeout'])->group(function () {
     Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
     Route::post('/quotes/store', [QuoteController::class, 'storeQuote'])->name('quotes.store');
-    Route::any('/quotes/{quote}', [QuoteController::class, 'show'])->name('quotes.show');
+    
     Route::post('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
+
+    Route::post('/quotes/{quote}/request-approval', [QuoteController::class, 'requestApproval'])->name('quotes.request-approval');
+    Route::get('/approved-bookings', [QuoteController::class, 'approvedBookings'])->name('quotes.approved');
+
     Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
     Route::get('/payments/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('payments.status');
     Route::get('/payments/{payment}/process', [PaymentController::class, 'processStripePayment'])->name('payments.process');
@@ -80,5 +85,9 @@ Route::prefix('admin')->group(function () {
         Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
         Route::get('/users/data', [UserController::class, 'data'])->name('admin.users.data');
         Route::post('/users/{user}/toggle-approval', [UserController::class, 'approve'])->name('admin.users.toggle-approval');
+
+        Route::get('/payment-requests', [PaymentRequestController::class, 'index'])->name('admin.payment-requests');
+        Route::get('/payment-requests/data', [PaymentRequestController::class, 'data'])->name('admin.payment-requests.data');
+        Route::post('/payment-requests/{paymentRequest}/update-status', [PaymentRequestController::class, 'updateStatus'])->name('admin.payment-requests.update-status');
     });
 });

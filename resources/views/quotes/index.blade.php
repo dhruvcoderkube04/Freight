@@ -73,7 +73,7 @@
     </div>
     <div class="drawer-content">
         <div class="form-section">
-            <form id="quoteForm">
+            <form id="quoteForm" action="{{ route('quotes.store') }}" method="POST">
                 @csrf
 
                 <!-- Step 1: quote Information -->
@@ -511,26 +511,27 @@
 
 <!-- Carrier Rates Modal -->
 <div class="modal fade" id="ratesModal" tabindex="-1">
-    <div class="modal-dialog modal-xl">
-        <div class="modal-content">
-            <div class="modal-header bg-primary text-white">
-                <h5 class="modal-title">Select Carrier Rate</h5>
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content border-0 shadow-lg rounded-4">
+            <div class="modal-header bg-primary text-white rounded-top-4">
+                <h5 class="modal-title fw-bold">Select Courier Service</h5>
                 <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
             </div>
-            <div class="modal-body">
-                <table id="carrierRatesTable" class="table table-striped" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Carrier</th>
-                            <th>Service</th>
-                            <th>Transit Days</th>
-                            <th>Rate</th>
-                            <th>Preferred</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <div class="modal-body p-4">
+                <form id="carrierForm">
+                    @csrf
+                    <input type="hidden" name="selected_carrier_index" id="selectedCarrierIndex">
+
+                    <div class="row g-4" id="carrierCards">
+                        <!-- Cards injected here -->
+                    </div>
+
+                    <div class="text-center mt-5">
+                        <button type="submit" class="btn btn-primary btn-lg px-5 rounded-pill shadow" id="actionButton" disabled>
+                            <span id="buttonText">Please select a service</span>
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
@@ -538,78 +539,138 @@
 @endsection
 
 @push('scripts')
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-function openRatesModal(button) {
-    const encryptedId = button.getAttribute('data-quote-id');
-    const carriersJson = button.getAttribute('data-carriers');
+let selectedIndex = null;
+let carriers = [];
+let encryptedId = '';
+const markupPercent = @json($settings->quote_markup ?? 0);
+const userAutoApproved = {{ Auth::user()->auto_approved ? 'true' : 'false' }};
+const csrfToken = '{{ csrf_token() }}';
 
-    // Safely parse JSON
-    let carriers = [];
-    try {
-        carriers = JSON.parse(carriersJson);
-    } catch (e) {
-        console.error('Invalid JSON:', carriersJson);
-        alert('Error loading carrier data');
+let actionButton, buttonText, selectedInput;
+
+function openRatesModal(btn) {
+    encryptedId = btn.dataset.quoteId;
+    try { carriers = JSON.parse(btn.dataset.carriers); }
+    catch (e) { Swal.fire('Error', 'Invalid data', 'error'); return; }
+
+    // Cache DOM
+    actionButton = document.getElementById('actionButton');
+    buttonText   = document.getElementById('buttonText');
+    selectedInput = document.getElementById('selectedCarrierIndex');
+
+    const container = document.getElementById('carrierCards');
+    container.innerHTML = '';
+
+    if (carriers.length === 0) {
+        container.innerHTML = '<div class="col-12 text-center py-5 text-muted">No rates available</div>';
+        actionButton.disabled = true;
+        new bootstrap.Modal(document.getElementById('ratesModal')).show();
         return;
     }
 
-    // Open Modal
-    const modal = new bootstrap.Modal(document.getElementById('ratesModal'));
-    const tbody = $('#carrierRatesTable tbody');
-    tbody.empty();
+    carriers.forEach((c, i) => {
+        const baseRate = parseFloat(c.customerRate || 0);
+        const total = baseRate * (1 + markupPercent / 100);
 
-    if (carriers.length === 0) {
-        tbody.append('<tr><td colspan="6" class="text-center text-muted">No carrier rates available</td></tr>');
-    } else {
-        carriers.forEach((c, i) => {
-            const preferredBadge = c.isPreferred 
-                ? '<span class="badge bg-warning ms-2">Preferred</span>' 
-                : '';
-            const cotyBadge = c.isCarrierOfTheYear 
-                ? '<span class="badge bg-info ms-2">Carrier of Year</span>' 
-                : '';
+        const deliveryDate = c.transitDays
+            ? new Date(Date.now() + c.transitDays * 86400000).toLocaleDateString('en-GB', { day: 'numeric', month: 'long' })
+            : 'N/A';
 
-            const row = `
-                <tr>
-                    <td>
-                        <strong>${c.carrier || 'Unknown'}</strong><br>
-                        <small class="text-muted">SCAC: ${c.scac || '—'}</small>
-                        ${preferredBadge} ${cotyBadge}
-                    </td>
-                    <td>${c.serviceLevelDescription || c.serviceLevel || 'Standard'}</td>
-                    <td>${c.transitDays ? c.transitDays + ' day' + (c.transitDays > 1 ? 's' : '') : '—'}</td>
-                    <td><strong class="text-success">$${parseFloat(c.customerRate || 0).toFixed(2)}</strong></td>
-                    <td>${c.isPreferred ? 'Yes' : 'No'}</td>
-                    <td>
-                        <form action="/quotes/${encryptedId}/payment" method="POST" style="display:inline">
-                            @csrf
-                            <input type="hidden" name="selected_carrier_index" value="${i}">
-                            <button type="submit" class="btn btn-sm btn-success">
-                                Select & Pay
-                            </button>
-                        </form>
-
-                    </td>
-                </tr>`;
-            tbody.append(row);
-        });
-    }
-
-    // Re-init DataTable
-    if ($.fn.DataTable.isDataTable('#carrierRatesTable')) {
-        $('#carrierRatesTable').DataTable().destroy();
-    }
-    $('#carrierRatesTable').DataTable({
-        paging: carriers.length > 10,
-        searching: false,
-        info: false,
-        ordering: true,
-        order: [[3, 'asc']],
-        columnDefs: [{ targets: 5, orderable: false }]
+        const card = document.createElement('div');
+        card.className = 'col-12 col-md-6 border rounded-4 py-3';
+        card.innerHTML = `
+            <label class="carrier-card ${i === 0 ? 'selected' : ''}" data-index="${i}">
+                <input type="radio" name="carrier" value="${i}" ${i === 0 ? 'checked' : ''}>
+                <div class="content">
+                    <h6 class="fw-bold mb-2">${c.carrier || 'Unknown'}</h6>
+                    <p class="text-muted small mb-3">
+                        Product estimated to reach you by <strong>${deliveryDate}</strong>
+                    </p>
+                    <div class="price fw-bold text-primary fs-3">$${total.toFixed(2)}</div>
+                </div>
+            </label>`;
+        container.appendChild(card);
     });
 
-    modal.show();
+    selectedIndex = 0;
+    selectedInput.value = 0;
+    updateActionButton();
+    attachCardClicks();
+    new bootstrap.Modal(document.getElementById('ratesModal')).show();
 }
+
+function attachCardClicks() {
+    document.querySelectorAll('.carrier-card').forEach(card => {
+        card.addEventListener('click', function () {
+            selectedIndex = parseInt(this.dataset.index);
+            selectedInput.value = selectedIndex;
+
+            // Visual update
+            document.querySelectorAll('.carrier-card').forEach(c => c.classList.remove('selected'));
+            this.classList.add('selected');
+            this.querySelector('input').checked = true;
+
+            updateActionButton();
+        });
+    });
+}
+
+function updateActionButton() {
+    if (selectedIndex === null) {
+        actionButton.disabled = true;
+        buttonText.textContent = 'Please select a service';
+        return;
+    }
+
+    const total = (parseFloat(carriers[selectedIndex].customerRate || 0) * (1 + markupPercent / 100)).toFixed(2);
+    actionButton.disabled = false;
+
+    if (userAutoApproved) {
+        buttonText.innerHTML = `Pay Now <strong>$${total}</strong>`;
+    } else {
+        buttonText.textContent = 'Request From Admin';
+    }
+}
+
+// Submit
+document.getElementById('carrierForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+
+    const url = userAutoApproved
+        ? `/quotes/${encryptedId}/payment`
+        : `/quotes/${encryptedId}/request-approval`;
+
+    const fd = new FormData();
+    fd.append('selected_carrier_index', selectedIndex);
+    fd.append('_token', csrfToken);
+
+    actionButton.disabled = true;
+    const orig = buttonText.innerHTML;
+    buttonText.textContent = 'Processing...';
+
+    try {
+        const res = await fetch(url, {
+            method: 'POST',
+            body: fd,
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (res.ok && data.success) {
+            Swal.fire({ icon: 'success', title: 'Success!', text: data.message, timer: 2000, showConfirmButton: false })
+                .then(() => data.redirect ? location.href = data.redirect : location.reload());
+        } else {
+            Swal.fire('Error', data.message || 'Failed', 'error');
+        }
+    } catch (err) {
+        Swal.fire('Error', 'Network error', 'error');
+    } finally {
+        actionButton.disabled = false;
+        buttonText.innerHTML = orig;
+    }
+});
 
 // Initialize main table
 $(document).ready(function() {
@@ -930,12 +991,13 @@ $(document).ready(function() {
 
             showLoading(true);
 
-            fetch(form.action || '/quotes/store', {
+            fetch(form.action, {
                 method: 'POST',
                 body: formData,
                 headers: {
                     'X-Requested-With': 'XMLHttpRequest',
                     'Accept': 'application/json',
+                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
                 }
             })
             .then(response => {

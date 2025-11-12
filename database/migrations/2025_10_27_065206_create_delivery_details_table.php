@@ -17,7 +17,7 @@ return new class extends Migration
             $table->string('country');
             $table->text('address_1');
             $table->text('address_2')->nullable();
-            $table->string('contact_number');
+            $table->string('contact_number')->nullable();
             $table->timestamps();
         });
     }

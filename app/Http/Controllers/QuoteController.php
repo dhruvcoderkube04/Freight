@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\CountryCode;
 use App\Models\FreightClassCode;
 use App\Models\LocationType;
+use App\Models\PaymentRequest;
 use App\Models\Quote;
 use App\Models\PickupDetail;
 use App\Models\DeliveryDetail;
@@ -56,22 +57,6 @@ class QuoteController extends Controller
         return view('quotes.index', compact(
             'locationTypes', 'countries', 'unitTypes', 'freightClasses', 'quotes', 'quoteTableData'
         ));
-    }
-
-    public function show($id)
-    {
-        $id = decrypt($id);
-        $quote = Quote::with(['tqlResponses', 'pickupDetail', 'deliveryDetail', 'commodities'])
-            ->where('user_id', Auth::id())
-            ->findOrFail($id);
-
-        $latestResponse = $quote->tqlResponses->last();
-
-        $locationTypes = LocationType::where('is_active', true)
-            ->orderBy('sort_order')
-            ->get();
-
-        return view('quotes.show', compact('quote', 'latestResponse', 'locationTypes'));
     }
 
     public function storeQuote(Request $request)
@@ -214,7 +199,7 @@ class QuoteController extends Controller
                 'success' => true,
                 'message' => 'Quote created successfully!',
                 'quote_id' => encrypt($quote->id),
-                'redirect' => route('quotes.show', encrypt($quote->id))
+                'redirect' => route('quotes.index', encrypt($quote->id))
             ]);
 
         } catch (\Exception $e) {
@@ -254,7 +239,7 @@ class QuoteController extends Controller
         $latestResponse = $quote->tqlResponses->last();
 
         if (!$latestResponse || $latestResponse->status !== 'success') {
-            return redirect()->route('quotes.show', $id)
+            return redirect()->route('quotes.index', $id)
                 ->with('error', 'No valid quote available for payment.');
         }
 
@@ -262,7 +247,7 @@ class QuoteController extends Controller
         $carriers = $latestResponse->response['content']['carrierPrices'] ?? [];
 
         if (!isset($carriers[$selectedCarrierIndex])) {
-            return redirect()->route('quotes.show', $id)
+            return redirect()->route('quotes.index', $id)
                 ->with('error', 'Selected carrier not found.');
         }
 
@@ -278,6 +263,75 @@ class QuoteController extends Controller
             'quote', 'latestResponse', 'selectedCarrier', 'selectedCarrierIndex',
             'baseRate', 'markupPercent', 'markupAmount', 'finalTotal'
         ));
+    }
+
+    public function approvedBookings()
+    {
+        $requests = PaymentRequest::with([
+                'quote.tqlResponses',
+                'quote.pickupDetail',
+                'quote.deliveryDetail',
+                'quote.commodities'
+            ])
+            ->where('user_id', Auth::id())
+            ->latest()
+            ->get();
+
+        return view('quotes.approved', compact('requests'));
+    }
+
+    public function requestApproval(Request $request, $quote)
+    {
+        $id = decrypt($quote);
+        $quote = Quote::with(['tqlResponses'])->where('user_id', Auth::id())->findOrFail($id);
+
+        $latestResponse = $quote->tqlResponses->last();
+        if (!$latestResponse || $latestResponse->status !== 'success') {
+            return response()->json(['success' => false, 'message' => 'No valid rates.'], 400);
+        }
+
+        $carrierIndex = $request->input('selected_carrier_index');
+        $carriers = $latestResponse->response['content']['carrierPrices'] ?? [];
+
+        if (!isset($carriers[$carrierIndex])) {
+            return response()->json(['success' => false, 'message' => 'Invalid carrier.'], 400);
+        }
+
+        $selectedCarrier = $carriers[$carrierIndex];
+        $baseRate = (float)($selectedCarrier['customerRate'] ?? 0);
+        $settings = SiteSetting::first();
+        $markupPercent = (float)($settings->quote_markup ?? 0);
+        $finalTotal = $baseRate + ($baseRate * $markupPercent / 100);
+
+        // PREVENT DUPLICATE BY CARRIER NAME + RATE
+        $exists = PaymentRequest::where('quote_id', $quote->id)
+            ->where('carrier_data->carrier', $selectedCarrier['carrier'] ?? null)
+            ->where('carrier_data->customerRate', $selectedCarrier['customerRate'] ?? null)
+            ->whereIn('status', ['pending', 'approved'])
+            ->exists();
+
+        if ($exists) {
+            return response()->json([
+                'success' => false,
+                'message' => 'You already requested approval for this carrier.'
+            ], 400);
+        }
+
+        PaymentRequest::create([
+            'user_id' => Auth::id(),
+            'quote_id' => $quote->id,
+            'carrier_data' => $selectedCarrier,
+            'amount' => $baseRate,
+            'total_amount' => $finalTotal,
+            'markup_percent' => $markupPercent,
+            'status' => 'pending',
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Approval request sent!',
+            'redirect' => route('quotes.index')
+        ]);
     }
 
     public function processPayment(Request $request, $quote)

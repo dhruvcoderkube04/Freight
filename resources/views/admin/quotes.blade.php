@@ -58,7 +58,7 @@
                             <td>{{ $quote->tqlResponses->count() }}</td>
                             <td>{{ $quote->created_at->format('Y-m-d H:i') }}</td>
                             <td>
-                                <a href="{{ route('quotes.show', encrypt($quote->id)) }}" class="btn btn-sm btn-primary"
+                                <a href="{{ route('quotes.index', encrypt($quote->id)) }}" class="btn btn-sm btn-primary"
                                     target="_blank">
                                     <i class="fas fa-eye"></i> View
                                 </a>

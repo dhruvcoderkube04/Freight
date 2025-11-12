@@ -55,7 +55,7 @@
                         <a href="{{ route('quotes.index') }}" class="btn btn-primary">
                             <i class="fas fa-list me-2"></i>View All Quotes
                         </a>
-                        <a href="{{ route('quotes.show', $payment->quote_id) }}" class="btn btn-outline-secondary">
+                        <a href="{{ route('quotes.index', $payment->quote_id) }}" class="btn btn-outline-secondary">
                             <i class="fas fa-eye me-2"></i>View Shipment Details
                         </a>
                         <button onclick="window.print()" class="btn btn-outline-primary">

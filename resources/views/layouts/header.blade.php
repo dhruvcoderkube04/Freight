@@ -13,7 +13,8 @@
             </div>
             <a href="#dashboard" class="{{ request()->routeIs('dashboard') ? 'active' : '' }}">Dashboard</a>
             <a href="#warehouse" class="{{ request()->routeIs('warehouse.*') ? 'active' : '' }}">Book Warehouse</a>
-            <a href="{{ route('quotes.index')}}" class="{{ request()->routeIs('quotes.*') ? 'active' : '' }}">Get A Quote</a>
+            <a href="{{ route('quotes.index')}}" class="{{ request()->routeIs('quotes.index') ? 'active' : '' }}">Get A Quote</a>
+            <a href="{{ route('quotes.approved') }}" class="{{ request()->routeIs('quotes.approved') ? 'active' : '' }}">Approved Bookings</a>
         </div>
         
         <div class="ark__nav-right">
