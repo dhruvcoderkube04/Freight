@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\SiteSettingController;
+use App\Http\Controllers\Admin\UserController;
 use App\Http\Controllers\Auth\AuthController;
 use App\Http\Controllers\Auth\AdminAuthController;
 use App\Http\Controllers\QuoteController;
@@ -71,7 +72,13 @@ Route::prefix('admin')->group(function () {
         Route::get('/quotes', [AdminController::class, 'quotes'])->name('admin.quotes');
         Route::get('/tql-responses', [AdminController::class, 'tqlResponses'])->name('admin.tql-responses');
 
+        // CMS Page
         Route::get('/settings', [SiteSettingController::class, 'index'])->name('admin.settings');
         Route::post('/settings', [SiteSettingController::class, 'update'])->name('admin.settings.update');
+
+        // User Management
+        Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
+        Route::get('/users/data', [UserController::class, 'data'])->name('admin.users.data');
+        Route::post('/users/{user}/toggle-approval', [UserController::class, 'approve'])->name('admin.users.toggle-approval');
     });
 });

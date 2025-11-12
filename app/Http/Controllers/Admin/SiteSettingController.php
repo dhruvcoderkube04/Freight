@@ -11,7 +11,7 @@ class SiteSettingController extends Controller
 {
     public function index()
     {
-        $settings = SiteSetting::first(); // May be null first time
+        $settings = SiteSetting::first();
         return view('admin.settings.index', compact('settings'));
     }
 
@@ -41,17 +41,13 @@ class SiteSettingController extends Controller
             'location_iframe' => 'nullable|string',
         ]);
 
-        // Create or update the single row
-        $settings = SiteSetting::firstOrCreate(['id' => 1]); // Ensures only one row
-
+        $settings = SiteSetting::firstOrCreate(['id' => 1]);
         $data = $request->except(['logo', 'favicon']);
 
-        // Handle business hours
         if ($request->business_hours_preset === 'custom') {
             $data['business_hours_preset'] = 'Custom';
         }
 
-        // Logo upload
         if ($request->hasFile('logo')) {
             if ($settings->logo && Storage::exists('public/' . $settings->logo)) {
                 Storage::delete('public/' . $settings->logo);
@@ -59,7 +55,6 @@ class SiteSettingController extends Controller
             $data['logo'] = $request->file('logo')->store('logos', 'public');
         }
 
-        // Favicon upload
         if ($request->hasFile('favicon')) {
             if ($settings->favicon && Storage::exists('public/' . $settings->favicon)) {
                 Storage::delete('public/' . $settings->favicon);

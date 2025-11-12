@@ -39,7 +39,6 @@ class User extends Authenticatable
         ];
     }
 
-    // Relationships
     public function quotes()
     {
         return $this->hasMany(Quote::class);
@@ -75,7 +74,6 @@ class User extends Authenticatable
         return $this->type === 'email';
     }
 
-    // Get social token based on provider type
     public function getSocialToken()
     {
         if ($this->type === 'google') {
@@ -86,7 +84,6 @@ class User extends Authenticatable
         return null;
     }
 
-    // Set social token based on provider type
     public function setSocialToken($token)
     {
         if ($this->type === 'google') {
@@ -94,5 +91,10 @@ class User extends Authenticatable
         } elseif ($this->type === 'facebook') {
             $this->facebook_token = $token;
         }
+    }
+
+    public function isApproved()
+    {
+        return $this->auto_approved === true;
     }
 }
