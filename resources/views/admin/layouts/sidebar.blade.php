@@ -102,9 +102,9 @@
                         </div>
                     </div>
 
-
+                    {{-- CMS Settings --}}
                     <div data-kt-menu-trigger="click" class="menu-item" title="Site Settings" data-bs-toggle="tooltip" data-bs-placement="right">
-                        <a class="menu-link {{ request()->is('admin/settings') ? 'active' : '' }}" href="{{ route('admin.settings') }}">
+                        <a class="menu-link {{ request()->is('admin/settings') ? 'active' : '' }}" href="{{ route('admin.settings.index') }}">
                             <span class="menu-icon">
                                 <i class="ki-duotone ki-element-7 fs-2 text-white">
                                     <span class="path1"></span>
@@ -117,6 +117,7 @@
                         </a>
                     </div>
 
+                    {{-- Customer List --}}
                     <div data-kt-menu-trigger="click" class="menu-item" title="Customers" data-bs-toggle="tooltip" data-bs-placement="right">
                         <a class="menu-link {{ request()->is('admin/users*') ? 'active' : '' }}" href="{{ route('admin.users.index') }}">
                                 <span class="menu-icon">
@@ -127,6 +128,21 @@
                                     </i>
                                 </span>
                             <span class="menu-title">Customers</span>
+                        </a>
+                    </div>
+
+                    {{-- payment-requests --}}
+                    <div data-kt-menu-trigger="click" class="menu-item" title="Payment Requests" data-bs-toggle="tooltip" data-bs-placement="right">
+                        <a class="menu-link {{ request()->is('admin/payment-requests*') ? 'active' : '' }}" href="{{ route('admin.payment-requests.index') }}">
+                                <span class="menu-icon">
+                                    <i class="ki-duotone ki-text-align-center fs-2 text-white">
+                                        <span class="path1"></span>
+                                        <span class="path2"></span>
+                                        <span class="path3"></span>
+                                        <span class="path4"></span>
+                                    </i>
+                                </span>
+                            <span class="menu-title">Payment Requests</span>
                         </a>
                     </div>
 

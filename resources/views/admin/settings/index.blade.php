@@ -1,9 +1,12 @@
 @extends('admin.layouts.base')
 
 @section('content')
+<div id="kt_app_content_container" class="app-container">
     <div class="card">
-        <div class="card-header">
-            <h3 class="card-title">Website CMS Settings</h3>
+        <div class="card-header border-0 pt-6">
+            <div class="card-title">
+                <h3 class="fw-bold">Website CMS Settings</h3>
+            </div>
         </div>
         <div class="card-body">
             @if (session('success'))
@@ -120,7 +123,7 @@
             </form>
         </div>
     </div>
-
+</div>
     <script>
         document.querySelector('[name=business_hours_preset]').addEventListener('change', function() {
             document.getElementById('custom_hours').style.display = this.value === 'custom' ? 'block' : 'none';

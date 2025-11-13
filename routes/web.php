@@ -34,60 +34,84 @@ Route::controller(AuthController::class)->group(function () {
 });
 
 Route::middleware(['auth', 'user', 'session.timeout'])->group(function () {
-    Route::get('/quotes/index', [QuoteController::class, 'index'])->name('quotes.index');
-    Route::post('/quotes/store', [QuoteController::class, 'storeQuote'])->name('quotes.store');
-    
-    Route::post('/quotes/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('quotes.payment.form');
 
-    Route::post('/quotes/{quote}/request-approval', [QuoteController::class, 'requestApproval'])->name('quotes.request-approval');
-    Route::get('/approved-bookings', [QuoteController::class, 'approvedBookings'])->name('quotes.approved');
+    /* ---------------- Quotes Routes ---------------- */
+    Route::prefix('quotes')->as('quotes.')->group(function () {
+        Route::get('/index', [QuoteController::class, 'index'])->name('index');
+        Route::post('/store', [QuoteController::class, 'storeQuote'])->name('store');
+        Route::post('/{id}/payment', [QuoteController::class, 'showPaymentForm'])->name('payment.form');
+        Route::post('/{quote}/request-approval', [QuoteController::class, 'requestApproval'])->name('request-approval');
+        Route::get('/approved-bookings', [QuoteController::class, 'approvedBookings'])->name('approved');
+        Route::post('/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('payment.process');
+    });
 
-    Route::post('/quotes/{id}/payment/process', [QuoteController::class, 'processPayment'])->name('quotes.payment.process');
-    Route::get('/payments/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('payments.status');
-    Route::get('/payments/{payment}/process', [PaymentController::class, 'processStripePayment'])->name('payments.process');
-    Route::get('/payments/{payment}/success', [PaymentController::class, 'paymentSuccess'])->name('payments.success');
-    Route::get('/payments/{payment}/cancel', [PaymentController::class, 'paymentCancel'])->name('payments.cancel');
+    /* ---------------- Payments Routes ---------------- */
+    Route::prefix('payments')->as('payments.')->group(function () {
+        Route::get('/{payment}/status', [QuoteController::class, 'paymentStatus'])->name('status');
+        Route::get('/{payment}/process', [PaymentController::class, 'processStripePayment'])->name('process');
+        Route::get('/{payment}/success', [PaymentController::class, 'paymentSuccess'])->name('success');
+        Route::get('/{payment}/cancel', [PaymentController::class, 'paymentCancel'])->name('cancel');
+    });
 });
+
 
 // ============================================================================
 // ADMIN ROUTES (Admin Users Only)
 // ============================================================================
 
-Route::prefix('admin')->group(function () {
-    Route::get('/', fn() => Auth::check() && Auth::user()->isAdmin()
-        ? redirect()->route('admin.dashboard')
-        : redirect()->route('admin.login')
-    );
+Route::prefix('admin')->as('admin.')->group(function () {
 
-    // Forgot Password
-    Route::get('/forgot-password', [AdminAuthController::class, 'showForgotPasswordForm'])->name('admin.password.request');
-    Route::post('/forgot-password', [AdminAuthController::class, 'sendResetLinkEmail'])->name('admin.password.email');
+    /* ---------------- Redirect Root ---------------- */
+    Route::get('/', function () {
+        return Auth::check() && Auth::user()->isAdmin()
+            ? redirect()->route('admin.dashboard')
+            : redirect()->route('admin.login');
+    });
 
-    // Reset Password
-    Route::get('/reset-password/{token}', [AdminAuthController::class, 'showResetPasswordForm'])->name('admin.password.reset');
-    Route::post('/reset-password', [AdminAuthController::class, 'resetPassword'])->name('admin.password.update');
+    /* ---------------- Password Reset ---------------- */
+    Route::controller(AdminAuthController::class)->group(function () {
+        Route::get('/forgot-password', 'showForgotPasswordForm')->name('password.request');
+        Route::post('/forgot-password', 'sendResetLinkEmail')->name('password.email');
 
-    // Admin Login/Logout (Public) – Using AdminAuthController
-    Route::get('/login', [AdminAuthController::class, 'showLoginForm'])->name('admin.login');
-    Route::post('/login', [AdminAuthController::class, 'login']);
-    Route::post('/logout', [AdminAuthController::class, 'logout'])->name('admin.logout');
-    
+        Route::get('/reset-password/{token}', 'showResetPasswordForm')->name('password.reset');
+        Route::post('/reset-password', 'resetPassword')->name('password.update');
+    });
+
+    /* ---------------- Authentication ---------------- */
+    Route::controller(AdminAuthController::class)->group(function () {
+        Route::get('/login', 'showLoginForm')->name('login');
+        Route::post('/login', 'login');
+        Route::post('/logout', 'logout')->name('logout');
+    });
+
+    /* ---------------- Protected Routes ---------------- */
     Route::middleware(['auth', 'admin', 'session.timeout'])->group(function () {
-        Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('admin.dashboard');
-        Route::get('/quotes', [AdminController::class, 'quotes'])->name('admin.quotes');
-        Route::get('/tql-responses', [AdminController::class, 'tqlResponses'])->name('admin.tql-responses');
 
-        // CMS Page
-        Route::get('/settings', [SiteSettingController::class, 'index'])->name('admin.settings');
-        Route::post('/settings', [SiteSettingController::class, 'update'])->name('admin.settings.update');
+        // Dashboard & General
+        Route::controller(AdminController::class)->group(function () {
+            Route::get('/dashboard', 'dashboard')->name('dashboard');
+            Route::get('/quotes', 'quotes')->name('quotes');
+            Route::get('/tql-responses', 'tqlResponses')->name('tql-responses');
+        });
+
+        // CMS Settings
+        Route::controller(SiteSettingController::class)->prefix('settings')->as('settings.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::post('/', 'update')->name('update');
+        });
 
         // User Management
-        Route::get('/users', [UserController::class, 'index'])->name('admin.users.index');
-        Route::get('/users/data', [UserController::class, 'data'])->name('admin.users.data');
-        Route::post('/users/{user}/toggle-approval', [UserController::class, 'approve'])->name('admin.users.toggle-approval');
+        Route::controller(UserController::class)->prefix('users')->as('users.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/data', 'data')->name('data');
+            Route::post('/{user}/toggle-approval', 'approve')->name('toggle-approval');
+        });
 
-        Route::get('/payment-requests', [PaymentRequestController::class, 'index'])->name('admin.payment-requests');
-        Route::get('/payment-requests/data', [PaymentRequestController::class, 'data'])->name('admin.payment-requests.data');
-        Route::post('/payment-requests/{paymentRequest}/update-status', [PaymentRequestController::class, 'updateStatus'])->name('admin.payment-requests.update-status');
+        // Payment Requests
+        Route::controller(PaymentRequestController::class)->prefix('payment-requests')->as('payment-requests.')->group(function () {
+            Route::get('/', 'index')->name('index');
+            Route::get('/data', 'data')->name('data');
+            Route::post('/{paymentRequest}/update-status', 'updateStatus')->name('update-status');
+        });
     });
 });

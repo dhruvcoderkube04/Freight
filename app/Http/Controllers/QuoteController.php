@@ -243,12 +243,22 @@ class QuoteController extends Controller
                 ->with('error', 'No valid quote available for payment.');
         }
 
-        $selectedCarrierIndex = $request->get('carrier_index', 0);
         $carriers = $latestResponse->response['content']['carrierPrices'] ?? [];
 
+        if (empty($carriers)) {
+            return redirect()->route('quotes.index')
+                ->with('error', 'No carrier rates available.');
+        }
+
+        $selectedCarrierIndex = (int) (
+            $request->input('selected_carrier_index') ??
+            $request->query('carrier_index') ??
+            0
+        );
+
         if (!isset($carriers[$selectedCarrierIndex])) {
-            return redirect()->route('quotes.index', $id)
-                ->with('error', 'Selected carrier not found.');
+            $cheapest = collect($carriers)->sortBy('customerRate')->first();
+            $selectedCarrierIndex = array_search($cheapest, $carriers);
         }
 
         $selectedCarrier = $carriers[$selectedCarrierIndex];

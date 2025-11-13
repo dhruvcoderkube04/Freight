@@ -15,31 +15,31 @@
         </button>
     </div>
     
-@if ($quotes->count() > 0)
-<div class="card shadow-sm mt-4">
-    <div class="card-body p-0">
-        <table id="quotesTable" class="table table-hover mb-0" style="width:100%">
-            <thead class="table-light">
-                <tr>
-                    <th>Quote ID</th>
-                    <th>Date</th>
-                    <th>Origin</th>
-                    <th>Destination</th>
-                    <th>Available Rates</th>
-                    <th>Best Rate</th>
-                    <th>Status</th>
-                    <th>Action</th>
-                </tr>
-            </thead>
-        </table>
-    </div>
-</div>
-@else
-<div class="empty-state text-center py-5">
-    <h3>No quotes yet</h3>
-    <p>Create your first freight quote to get started.</p>
-</div>
-@endif
+    @if ($quotes->count() > 0)
+        <div class="card shadow-sm mt-4">
+            <div class="card-body p-0">
+                <table id="quotesTable" class="table table-hover mb-0" style="width:100%">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Quote ID</th>
+                            <th>Date</th>
+                            <th>Origin</th>
+                            <th>Destination</th>
+                            <th>Available Rates</th>
+                            <th>Best Rate</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                </table>
+            </div>
+        </div>
+        @else
+        <div class="empty-state text-center py-5">
+            <h3>No quotes yet</h3>
+            <p>Create your first freight quote to get started.</p>
+        </div>
+    @endif
 </div>
 
 <!-- Success Popup -->
@@ -539,7 +539,6 @@
 @endsection
 
 @push('scripts')
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
 let selectedIndex = null;
 let carriers = [];
@@ -654,18 +653,51 @@ document.getElementById('carrierForm').addEventListener('submit', async function
         const res = await fetch(url, {
             method: 'POST',
             body: fd,
-            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }
+            headers: {
+                'X-Requested-With': 'XMLHttpRequest',
+                'Accept': 'application/json, text/html', // Important: accept both
+            }
         });
-        const data = await res.json();
 
-        if (res.ok && data.success) {
-            Swal.fire({ icon: 'success', title: 'Success!', text: data.message, timer: 2000, showConfirmButton: false })
-                .then(() => data.redirect ? location.href = data.redirect : location.reload());
+        const contentType = res.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+            // JSON response (e.g., from request-approval or API-style)
+            const data = await res.json();
+
+            if (res.ok && data.success) {
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Success!',
+                    text: data.message,
+                    timer: 2000,
+                    showConfirmButton: false
+                }).then(() => {
+                    if (data.redirect) {
+                        location.href = data.redirect;
+                    } else {
+                        location.reload();
+                    }
+                });
+            } else {
+                Swal.fire('Error', data.message || 'Operation failed', 'error');
+            }
         } else {
-            Swal.fire('Error', data.message || 'Failed', 'error');
+            // HTML response (e.g., payment form page)
+            if (res.ok) {
+                // Success: redirect to the payment page
+                const text = await res.text();
+                document.open();
+                document.write(text);
+                document.close();
+                // OR simply: location.href = res.url; (but may not work after POST)
+            } else {
+                Swal.fire('Error', 'Server error', 'error');
+            }
         }
     } catch (err) {
-        Swal.fire('Error', 'Network error', 'error');
+        console.error(err);
+        Swal.fire('Error', 'Failed to process request. Please try again.', 'error');
     } finally {
         actionButton.disabled = false;
         buttonText.innerHTML = orig;

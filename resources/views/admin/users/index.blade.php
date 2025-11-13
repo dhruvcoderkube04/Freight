@@ -2,7 +2,7 @@
 @section('title', 'Customers')
 
 @section('content')
-<div id="kt_app_content_container" class="app-container container-xxl">
+<div id="kt_app_content_container" class="app-container">
     <div class="card">
         <div class="card-header border-0 pt-6">
             <div class="card-title">
